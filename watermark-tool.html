@@ -364,6 +364,43 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 .auth-error { font-size: var(--text-xs); color: var(--color-error); margin-top: var(--space-2); display: none; padding: var(--space-2) var(--space-3); background: oklch(from var(--color-error) l c h / 0.08); border-radius: var(--radius-md); }
 .auth-error.show { display: block; }
 
+/* ===== CAPTCHA ===== */
+.captcha-wrap {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+}
+.captcha-question { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); white-space: nowrap; }
+.captcha-input {
+  width: 72px !important; text-align: center;
+  font-size: var(--text-sm); font-weight: 700;
+  margin: 0 !important;
+}
+.captcha-refresh {
+  width: 28px; height: 28px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-muted); flex-shrink: 0;
+  transition: background var(--transition-interactive);
+}
+.captcha-refresh:hover { background: var(--color-surface-dynamic); color: var(--color-text); }
+
+/* ===== REMEMBER ME ===== */
+.remember-row {
+  display: flex; align-items: center; gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.remember-row input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: var(--color-primary);
+  cursor: pointer; flex-shrink: 0;
+}
+.remember-row label {
+  font-size: var(--text-xs); color: var(--color-text-muted);
+  cursor: pointer; margin: 0;
+}
+
 /* ===== PRESET BANNER ===== */
 .preset-banner {
   display: none; align-items: center; gap: var(--space-3);
@@ -747,6 +784,11 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
         <label for="loginPassword">密碼</label>
         <input type="password" id="loginPassword" placeholder="輸入密碼" autocomplete="current-password">
       </div>
+      <!-- 記住我 -->
+      <div class="remember-row">
+        <input type="checkbox" id="rememberMe">
+        <label for="rememberMe">記住我（7 天內自動登入）</label>
+      </div>
       <div class="auth-error" id="loginError"></div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:var(--space-2)" id="btnLogin">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
@@ -771,6 +813,14 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
         <label for="regPassword">密碼</label>
         <input type="password" id="regPassword" placeholder="至少 8 個字元" autocomplete="new-password">
       </div>
+      <!-- 數字驗證 -->
+      <div class="captcha-wrap" id="captchaWrap">
+        <span class="captcha-question" id="captchaQuestion">載入中...</span>
+        <input type="number" class="captcha-input" id="captchaInput" placeholder="答案" min="0" max="99" autocomplete="off">
+        <button type="button" class="captcha-refresh" id="captchaRefresh" aria-label="換一題" title="換一題">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        </button>
+      </div>
       <div class="auth-error" id="registerError"></div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:var(--space-2)" id="btnRegister">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
@@ -792,6 +842,8 @@ const API = {
   me:       `${WP_URL}/wp-json/wp/v2/users/me`,
   meta:     `${WP_URL}/wp-json/watermark/v1/preset`,
 };
+const REMEMBER_KEY = 'wm_remember';
+const REMEMBER_DAYS = 7;
 
 // ===== AUTH STATE =====
 const auth = { token: null, user: null, preset: null };
@@ -805,6 +857,32 @@ const state = {
   activeTab: 'text',
   previewIndex: 0,
 };
+
+// ===== REMEMBER ME helpers (cookie-based, no localStorage) =====
+function setCookie(name, value, days) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+}
+function getCookie(name) {
+  const m = document.cookie.match('(?:^|;)\\s*' + name + '=([^;]*)');
+  return m ? decodeURIComponent(m[1]) : null;
+}
+function deleteCookie(name) {
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+}
+
+// ===== CAPTCHA =====
+let captchaAnswer = 0;
+function generateCaptcha() {
+  const ops = ['+', '-', '+'];
+  const a = Math.floor(Math.random() * 15) + 1;
+  const b = Math.floor(Math.random() * 10) + 1;
+  const op = ops[Math.floor(Math.random() * ops.length)];
+  captchaAnswer = op === '+' ? a + b : a - b;
+  document.getElementById('captchaQuestion').textContent = `請計算：${a} ${op} ${b} = ?`;
+  document.getElementById('captchaInput').value = '';
+}
+document.getElementById('captchaRefresh').addEventListener('click', generateCaptcha);
 
 // ===== THEME TOGGLE =====
 (function(){
@@ -849,6 +927,7 @@ function switchModalTab(tab) {
   document.querySelectorAll('.modal-tab').forEach(b => b.classList.toggle('active', b.dataset.modalTab === tab));
   document.querySelectorAll('.modal-form').forEach(f => f.classList.toggle('active', f.id === 'modal-' + tab));
   document.getElementById('modalTitle').textContent = tab === 'login' ? '會員登入' : '建立新帳號';
+  if (tab === 'register') generateCaptcha();
 }
 
 document.getElementById('btnOpenAuth').addEventListener('click', openAuthModal);
@@ -856,10 +935,23 @@ document.getElementById('modalClose').addEventListener('click', closeAuthModal);
 document.getElementById('authModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeAuthModal(); });
 document.querySelectorAll('.modal-tab').forEach(btn => btn.addEventListener('click', () => switchModalTab(btn.dataset.modalTab)));
 
+// ===== CORE LOGIN FUNCTION =====
+async function doLogin(username, password) {
+  const res = await fetch(API.token, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || '帳號或密碼錯誤');
+  return data;
+}
+
 // ===== LOGIN =====
 document.getElementById('btnLogin').addEventListener('click', async () => {
   const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
+  const remember = document.getElementById('rememberMe').checked;
   const errEl = document.getElementById('loginError');
   errEl.classList.remove('show');
   if (!username || !password) { errEl.textContent = '請填寫帳號與密碼'; errEl.classList.add('show'); return; }
@@ -868,23 +960,24 @@ document.getElementById('btnLogin').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = '登入中...';
 
   try {
-    const res = await fetch(API.token, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || '帳號或密碼錯誤');
-
+    const data = await doLogin(username, password);
     auth.token = data.token;
     auth.user = { name: data.user_display_name, email: data.user_email, nicename: data.user_nicename };
+
+    if (remember) {
+      setCookie(REMEMBER_KEY, JSON.stringify({ username, password }), REMEMBER_DAYS);
+    } else {
+      deleteCookie(REMEMBER_KEY);
+    }
+
     closeAuthModal();
     onLoginSuccess();
   } catch(e) {
     errEl.textContent = e.message;
     errEl.classList.add('show');
   } finally {
-    btn.disabled = false; btn.textContent = '登入';
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> 登入';
   }
 });
 
@@ -893,10 +986,18 @@ document.getElementById('btnRegister').addEventListener('click', async () => {
   const username = document.getElementById('regUsername').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPassword').value;
+  const captchaVal = parseInt(document.getElementById('captchaInput').value, 10);
   const errEl = document.getElementById('registerError');
   errEl.classList.remove('show');
+
   if (!username || !email || !password) { errEl.textContent = '請填寫所有欄位'; errEl.classList.add('show'); return; }
   if (password.length < 8) { errEl.textContent = '密碼至少需要 8 個字元'; errEl.classList.add('show'); return; }
+  if (isNaN(captchaVal) || captchaVal !== captchaAnswer) {
+    errEl.textContent = '驗證答案錯誤，請重新計算';
+    errEl.classList.add('show');
+    generateCaptcha();
+    return;
+  }
 
   const btn = document.getElementById('btnRegister');
   btn.disabled = true; btn.textContent = '建立中...';
@@ -910,14 +1011,20 @@ document.getElementById('btnRegister').addEventListener('click', async () => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || '註冊失敗，請換個帳號名稱或信箱');
 
-    showToast('帳號建立成功！請登入');
-    switchModalTab('login');
-    document.getElementById('loginUsername').value = username;
+    // 註冊成功 → 直接自動登入
+    showToast('帳號建立成功！正在自動登入...');
+    const loginData = await doLogin(username, password);
+    auth.token = loginData.token;
+    auth.user = { name: loginData.user_display_name, email: loginData.user_email, nicename: loginData.user_nicename };
+    closeAuthModal();
+    onLoginSuccess();
   } catch(e) {
     errEl.textContent = e.message;
     errEl.classList.add('show');
+    generateCaptcha();
   } finally {
-    btn.disabled = false; btn.textContent = '建立帳號';
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> 建立帳號';
   }
 });
 
@@ -933,9 +1040,26 @@ function onLoginSuccess() {
   fetchPreset();
 }
 
+// ===== AUTO LOGIN FROM COOKIE =====
+(async function tryAutoLogin() {
+  const saved = getCookie(REMEMBER_KEY);
+  if (!saved) return;
+  try {
+    const { username, password } = JSON.parse(saved);
+    if (!username || !password) return;
+    const data = await doLogin(username, password);
+    auth.token = data.token;
+    auth.user = { name: data.user_display_name, email: data.user_email, nicename: data.user_nicename };
+    onLoginSuccess();
+  } catch(e) {
+    deleteCookie(REMEMBER_KEY);
+  }
+})();
+
 // ===== LOGOUT =====
 document.getElementById('btnLogout').addEventListener('click', () => {
   auth.token = null; auth.user = null; auth.preset = null;
+  deleteCookie(REMEMBER_KEY);
   document.getElementById('btnOpenAuth').style.display = 'flex';
   document.getElementById('userMenuWrap').style.display = 'none';
   document.getElementById('btnSavePresetInline').style.display = 'none';
