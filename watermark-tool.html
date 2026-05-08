@@ -788,7 +788,7 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 const WP_URL = 'https://watermark.wulk.cc';
 const API = {
   token:    `${WP_URL}/wp-json/jwt-auth/v1/token`,
-  register: `${WP_URL}/wp-json/wp/v2/users/register`,
+  register: `${WP_URL}/wp-json/watermark/v1/register`,
   me:       `${WP_URL}/wp-json/wp/v2/users/me`,
   meta:     `${WP_URL}/wp-json/watermark/v1/preset`,
 };
@@ -1185,176 +1185,187 @@ function applyWatermark(img) {
   ctx.drawImage(img, 0, 0);
 
   const opacity = parseFloat(document.getElementById('wmOpacity').value) / 100;
-  const rotation = parseFloat(document.getElementById('wmRotation').value) * (Math.PI / 180);
-  const tiled = document.getElementById('wmTile').checked;
-  const pos = state.selectedPos;
+  const rotation = parseFloat(document.getElementById('wmRotation').value) * Math.PI / 180;
+  const isTile = document.getElementById('wmTile').checked;
 
   ctx.globalAlpha = opacity;
 
-  if (state.activeTab === 'text') {
-    const text = document.getElementById('wmText').value || '浮水印';
-    const fontSize = parseInt(document.getElementById('wmFontSize').value);
-    const font = document.getElementById('wmFont').value;
-    const color = document.getElementById('wmColor').value;
-
-    ctx.font = `${fontSize}px ${font}`;
-    ctx.fillStyle = color;
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'center';
-
-    const metrics = ctx.measureText(text);
-    const tw = metrics.width;
-    const th = fontSize;
-
-    if (tiled) {
-      const gap = parseInt(document.getElementById('wmTileGap').value);
-      const stepX = tw + gap; const stepY = th + gap;
-      for (let y = -canvas.height; y < canvas.height * 2; y += stepY) {
-        for (let x = -canvas.width; x < canvas.width * 2; x += stepX) {
-          ctx.save(); ctx.translate(x + tw/2, y + th/2); ctx.rotate(rotation);
-          ctx.fillText(text, 0, 0); ctx.restore();
-        }
-      }
-    } else {
-      const {x, y} = getPosition(pos, canvas.width, canvas.height, tw, th);
-      ctx.save(); ctx.translate(x, y); ctx.rotate(rotation); ctx.fillText(text, 0, 0); ctx.restore();
-    }
-
+  if (isTile) {
+    drawTile(ctx, canvas.width, canvas.height, rotation);
   } else {
-    const wmImg = state.wmImage;
-    if (!wmImg) return canvas;
-    const sizePercent = parseInt(document.getElementById('wmImgSize').value) / 100;
-    const scale = (canvas.width * sizePercent) / wmImg.width;
-    const ww = wmImg.width * scale; const wh = wmImg.height * scale;
-
-    if (tiled) {
-      const gap = parseInt(document.getElementById('wmTileGap').value);
-      for (let y = -canvas.height; y < canvas.height * 2; y += wh + gap) {
-        for (let x = -canvas.width; x < canvas.width * 2; x += ww + gap) {
-          ctx.save(); ctx.translate(x + ww/2, y + wh/2); ctx.rotate(rotation);
-          ctx.drawImage(wmImg, -ww/2, -wh/2, ww, wh); ctx.restore();
-        }
-      }
-    } else {
-      const {x, y} = getPosition(pos, canvas.width, canvas.height, ww, wh);
-      ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
-      ctx.drawImage(wmImg, -ww/2, -wh/2, ww, wh); ctx.restore();
-    }
+    drawSingle(ctx, canvas.width, canvas.height, rotation);
   }
 
-  ctx.globalAlpha = 1;
   return canvas;
 }
 
-function getPosition(pos, cw, ch, ww, wh) {
-  const margin = Math.min(cw, ch) * 0.05;
-  const map = {
-    'top-left':      [margin + ww/2, margin + wh/2],
-    'top-center':    [cw/2, margin + wh/2],
-    'top-right':     [cw - margin - ww/2, margin + wh/2],
-    'center-left':   [margin + ww/2, ch/2],
-    'center':        [cw/2, ch/2],
-    'center-right':  [cw - margin - ww/2, ch/2],
-    'bottom-left':   [margin + ww/2, ch - margin - wh/2],
-    'bottom-center': [cw/2, ch - margin - wh/2],
-    'bottom-right':  [cw - margin - ww/2, ch - margin - wh/2],
-  };
-  const [x, y] = map[pos] || [cw/2, ch/2];
-  return {x, y};
+function getWmSize(canvasW) {
+  if (state.activeTab === 'image') {
+    const pct = parseFloat(document.getElementById('wmImgSize').value) / 100;
+    return Math.round(canvasW * pct);
+  }
+  return parseFloat(document.getElementById('wmFontSize').value);
+}
+
+function drawWmElement(ctx, x, y, rotation) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  if (state.activeTab === 'text') {
+    const fontSize = parseFloat(document.getElementById('wmFontSize').value);
+    const font = document.getElementById('wmFont').value;
+    const color = document.getElementById('wmColor').value;
+    ctx.font = `${fontSize}px ${font}`;
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(document.getElementById('wmText').value || '浮水印', 0, 0);
+  } else {
+    if (!state.wmImage) { ctx.restore(); return; }
+    const w = getWmSize(ctx.canvas.width);
+    const ratio = state.wmImage.width / state.wmImage.height;
+    const h = w / ratio;
+    ctx.drawImage(state.wmImage, -w/2, -h/2, w, h);
+  }
+  ctx.restore();
+}
+
+function getTextMetrics(ctx) {
+  if (state.activeTab === 'text') {
+    const fontSize = parseFloat(document.getElementById('wmFontSize').value);
+    const font = document.getElementById('wmFont').value;
+    ctx.font = `${fontSize}px ${font}`;
+    const m = ctx.measureText(document.getElementById('wmText').value || '浮水印');
+    return { w: m.width, h: fontSize };
+  } else {
+    if (!state.wmImage) return { w: 100, h: 100 };
+    const w = getWmSize(ctx.canvas.width);
+    return { w, h: w / (state.wmImage.width / state.wmImage.height) };
+  }
+}
+
+function drawSingle(ctx, cw, ch, rotation) {
+  const pos = state.selectedPos;
+  const { w, h } = getTextMetrics(ctx);
+  const pad = Math.max(w, h) * 0.6 + 20;
+  let x = cw / 2, y = ch / 2;
+  if (pos.includes('left')) x = pad;
+  if (pos.includes('right')) x = cw - pad;
+  if (pos.includes('top')) y = pad;
+  if (pos.includes('bottom')) y = ch - pad;
+  drawWmElement(ctx, x, y, rotation);
+}
+
+function drawTile(ctx, cw, ch, rotation) {
+  const gap = parseFloat(document.getElementById('wmTileGap').value);
+  const { w, h } = getTextMetrics(ctx);
+  const stepX = w + gap;
+  const stepY = h + gap;
+  for (let y = -ch; y < ch * 2; y += stepY) {
+    for (let x = -cw; x < cw * 2; x += stepX) {
+      drawWmElement(ctx, x, y, rotation);
+    }
+  }
 }
 
 // ===== PREVIEW =====
 function updatePreview() {
+  const canvas = document.getElementById('previewCanvas');
+  const empty = document.getElementById('previewEmpty');
   if (!state.files.length) {
-    document.getElementById('previewCanvas').style.display = 'none';
-    document.getElementById('previewEmpty').style.display = '';
-    return;
+    canvas.style.display = 'none'; empty.style.display = 'flex'; return;
   }
-  const f = state.files[state.previewIndex];
-  if (!f) return;
-  const canvas = applyWatermark(f.img);
-  const previewCanvas = document.getElementById('previewCanvas');
-  previewCanvas.width = canvas.width;
-  previewCanvas.height = canvas.height;
-  previewCanvas.getContext('2d').drawImage(canvas, 0, 0);
-  previewCanvas.style.display = '';
-  document.getElementById('previewEmpty').style.display = 'none';
+  empty.style.display = 'none'; canvas.style.display = 'block';
+  const src = state.files[state.previewIndex];
+  if (!src) return;
+  const result = applyWatermark(src.img);
+  const ctx = canvas.getContext('2d');
+  canvas.width = result.width; canvas.height = result.height;
+  ctx.drawImage(result, 0, 0);
 }
 
 document.getElementById('refreshPreview').addEventListener('click', updatePreview);
-
-// ===== BATCH PROCESS =====
-document.getElementById('btnProcess').addEventListener('click', async () => {
-  if (!state.files.length) return;
-  const btn = document.getElementById('btnProcess');
-  btn.disabled = true;
-  const progressWrap = document.getElementById('progressWrap');
-  const progressFill = document.getElementById('progressFill');
-  const progressText = document.getElementById('progressText');
-  progressWrap.style.display = '';
-  state.processedBlobs = [];
-  const format = document.getElementById('outputFormat').value;
-  const quality = parseInt(document.getElementById('outputQuality').value) / 100;
-
-  for (let i = 0; i < state.files.length; i++) {
-    progressText.textContent = `處理中 ${i + 1} / ${state.files.length}`;
-    progressFill.style.width = ((i + 1) / state.files.length * 100) + '%';
-    state.files[i].processed = false;
-    renderGrid();
-    await new Promise(r => setTimeout(r, 10));
-    const canvas = applyWatermark(state.files[i].img);
-    const blob = await new Promise(r => canvas.toBlob(r, format, quality));
-    state.processedBlobs.push(blob);
-    state.files[i].processed = true;
-  }
-
-  renderGrid(); updateStats();
-  progressText.textContent = `✓ 全部完成！共 ${state.files.length} 張`;
-  document.getElementById('btnDownloadAll').disabled = false;
-  btn.disabled = false;
-  showToast(`${state.files.length} 張圖片處理完成！`);
-});
-
-// ===== DOWNLOAD ALL (ZIP) =====
-document.getElementById('btnDownloadAll').addEventListener('click', async () => {
-  if (!state.processedBlobs.length) { showToast('請先執行批次處理', 'error'); return; }
-  const format = document.getElementById('outputFormat').value;
-  const ext = format.split('/')[1];
-  if (!window.JSZip) {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-    document.head.appendChild(s);
-    await new Promise(r => s.onload = r);
-  }
-  const zip = new JSZip();
-  state.processedBlobs.forEach((blob, i) => {
-    const orig = state.files[i].file.name.replace(/\.[^.]+$/, '');
-    zip.file(`${orig}_watermark.${ext}`, blob);
-  });
-  const zipBlob = await zip.generateAsync({ type: 'blob' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(zipBlob);
-  a.download = 'watermarked_images.zip';
-  a.click();
-  showToast('ZIP 下載已開始！');
-});
-
-// ===== CLEAR =====
-document.getElementById('btnClear').addEventListener('click', () => {
-  state.files = []; state.processedBlobs = []; state.previewIndex = 0;
-  renderGrid(); updateStats(); updatePreview();
-  document.getElementById('btnDownloadAll').disabled = true;
-  document.getElementById('btnProcess').disabled = true;
-  document.getElementById('progressWrap').style.display = 'none';
-  document.getElementById('fileInput').value = '';
-  showToast('已清除所有圖片');
-});
 
 // ===== STATS =====
 function updateStats() {
   document.getElementById('statTotal').textContent = state.files.length;
   document.getElementById('statDone').textContent = state.files.filter(f => f.processed).length;
 }
+
+// ===== PROCESS =====
+document.getElementById('btnProcess').addEventListener('click', async () => {
+  if (!state.files.length) return;
+  const btn = document.getElementById('btnProcess');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+
+  btn.disabled = true;
+  progressWrap.style.display = 'block';
+  state.processedBlobs = [];
+
+  for (let i = 0; i < state.files.length; i++) {
+    const f = state.files[i];
+    const result = applyWatermark(f.img);
+    const fmt = document.getElementById('outputFormat').value;
+    const quality = parseFloat(document.getElementById('outputQuality').value) / 100;
+    await new Promise(resolve => {
+      result.toBlob(blob => {
+        state.processedBlobs[i] = { blob, name: f.file.name };
+        f.processed = true;
+        resolve();
+      }, fmt, fmt === 'image/png' ? undefined : quality);
+    });
+    const pct = Math.round(((i + 1) / state.files.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressText.textContent = `處理中… ${i + 1} / ${state.files.length}`;
+    await new Promise(r => setTimeout(r, 10));
+  }
+
+  renderGrid();
+  updateStats();
+  progressText.textContent = `全部完成！共 ${state.files.length} 張`;
+  btn.disabled = false;
+  document.getElementById('btnDownloadAll').disabled = false;
+  showToast(`已處理完成 ${state.files.length} 張圖片！`);
+});
+
+// ===== DOWNLOAD ALL (ZIP) =====
+document.getElementById('btnDownloadAll').addEventListener('click', async () => {
+  if (!state.processedBlobs.length) return;
+  const btn = document.getElementById('btnDownloadAll');
+  btn.disabled = true; btn.textContent = '打包中...';
+  try {
+    const { default: JSZip } = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm');
+    const zip = new JSZip();
+    const fmt = document.getElementById('outputFormat').value;
+    const ext = fmt.split('/')[1];
+    state.processedBlobs.forEach(({ blob, name }, i) => {
+      if (!blob) return;
+      const baseName = name.replace(/\.[^.]+$/, '');
+      zip.file(`${baseName}_wm.${ext}`, blob);
+    });
+    const content = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = 'watermarked_images.zip';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('ZIP 下載完成！');
+  } catch(e) {
+    showToast('下載失敗：' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '下載全部（ZIP）';
+  }
+});
+
+// ===== CLEAR =====
+document.getElementById('btnClear').addEventListener('click', () => {
+  state.files = []; state.processedBlobs = [];
+  renderGrid(); updateStats(); updatePreview();
+  document.getElementById('btnDownloadAll').disabled = true;
+  document.getElementById('progressWrap').style.display = 'none';
+});
 </script>
 </body>
 </html>
