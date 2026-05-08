@@ -100,9 +100,14 @@ header {
   padding: var(--space-3) var(--space-6);
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
 }
-.logo { display: flex; align-items: center; gap: var(--space-2); text-decoration: none; color: var(--color-text); }
+.logo { display: flex; align-items: center; gap: var(--space-3); text-decoration: none; color: var(--color-text); }
 .logo-img { height: 36px; width: auto; display: block; object-fit: contain; }
-.logo-text { font-size: var(--text-base); font-weight: 700; letter-spacing: -0.01em; }
+.logo-divider {
+  width: 1px; height: 22px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+.logo-text { font-size: var(--text-sm); font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
 .header-actions { display: flex; align-items: center; gap: var(--space-2); }
 .theme-toggle {
   width: 36px; height: 36px; border-radius: var(--radius-full);
@@ -304,6 +309,8 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
   .stats-bar { gap: var(--space-4); }
   .position-grid { grid-template-columns: repeat(3, 36px); }
   .pos-btn { width: 36px; height: 36px; }
+  .logo-text { display: none; }
+  .logo-divider { display: none; }
 }
 </style>
 </head>
@@ -314,7 +321,9 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 <header>
   <div class="header-inner">
     <a href="#" class="logo">
-      <img src="./logo.png" alt="浮水印工具" class="logo-img" height="36" width="auto" loading="eager">
+      <img src="./logo.png" alt="批次浮水印工具" class="logo-img" height="36" width="auto" loading="eager">
+      <div class="logo-divider" aria-hidden="true"></div>
+      <span class="logo-text">批次浮水印工具</span>
     </a>
     <div class="header-actions">
       <span class="badge badge-primary">免費 · 純前端處理</span>
