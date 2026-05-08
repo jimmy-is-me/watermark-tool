@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>批次浮水印工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root, [data-theme="light"] {
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+  --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+  --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+  --space-16: 4rem;
+
+  --color-bg: #f7f6f2;
+  --color-surface: #f9f8f5;
+  --color-surface-2: #fbfbf9;
+  --color-surface-offset: #f3f0ec;
+  --color-surface-dynamic: #e6e4df;
+  --color-divider: #dcd9d5;
+  --color-border: #d4d1ca;
+  --color-text: #28251d;
+  --color-text-muted: #7a7974;
+  --color-text-faint: #bab9b4;
+  --color-primary: #01696f;
+  --color-primary-hover: #0c4e54;
+  --color-primary-highlight: #cedcd8;
+  --color-error: #a12c7b;
+  --color-success: #437a22;
+
+  --radius-sm: 0.375rem; --radius-md: 0.5rem;
+  --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+  --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.01 80 / 0.12);
+  --font-body: 'Inter', system-ui, sans-serif;
+  --content-default: 1100px;
+}
+[data-theme="dark"] {
+  --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
+  --color-surface-offset: #1d1c1a; --color-surface-dynamic: #2d2c2a;
+  --color-divider: #262523; --color-border: #393836;
+  --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
+  --color-primary: #4f98a3; --color-primary-hover: #227f8b;
+  --color-primary-highlight: #313b3b;
+  --color-error: #d163a7; --color-success: #6daa45;
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.4);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
+    --color-surface-offset: #1d1c1a; --color-surface-dynamic: #2d2c2a;
+    --color-divider: #262523; --color-border: #393836;
+    --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
+    --color-primary: #4f98a3; --color-primary-hover: #227f8b;
+    --color-primary-highlight: #313b3b;
+    --color-error: #d163a7; --color-success: #6daa45;
+  }
+}
+
+/* ===== BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body {
+  min-height: 100dvh; font-family: var(--font-body);
+  font-size: var(--text-base); color: var(--color-text);
+  background: var(--color-bg);
+}
+img, canvas { display: block; max-width: 100%; }
+input, button, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: none; }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ===== LAYOUT ===== */
+.app-wrapper { display: flex; flex-direction: column; min-height: 100dvh; }
+
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+.header-inner {
+  max-width: var(--content-default); margin: 0 auto;
+  padding: var(--space-3) var(--space-6);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+}
+.logo { display: flex; align-items: center; gap: var(--space-2); text-decoration: none; color: var(--color-text); }
+.logo-mark { color: var(--color-primary); }
+.logo-text { font-size: var(--text-base); font-weight: 700; letter-spacing: -0.01em; }
+.header-actions { display: flex; align-items: center; gap: var(--space-2); }
+.theme-toggle {
+  width: 36px; height: 36px; border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-muted); transition: background var(--transition-interactive), color var(--transition-interactive);
+}
+.theme-toggle:hover { background: var(--color-surface-offset); color: var(--color-text); }
+
+main { flex: 1; max-width: var(--content-default); margin: 0 auto; width: 100%; padding: var(--space-8) var(--space-6); }
+
+/* ===== SECTION TITLES ===== */
+.section-title { font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2); }
+.section-title svg { color: var(--color-primary); flex-shrink: 0; }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl); padding: var(--space-6); box-shadow: var(--shadow-sm);
+}
+.card + .card { margin-top: var(--space-6); }
+
+/* ===== TWO-COL GRID ===== */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+@media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ===== FORM CONTROLS ===== */
+.form-group { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-4); }
+.form-group:last-child { margin-bottom: 0; }
+label { font-size: var(--text-sm); font-weight: 500; color: var(--color-text-muted); }
+input[type="text"], input[type="number"], select, textarea {
+  background: var(--color-bg); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm); color: var(--color-text);
+  transition: border-color var(--transition-interactive), box-shadow var(--transition-interactive);
+  width: 100%;
+}
+input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+  border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-highlight);
+  outline: none;
+}
+input[type="range"] { width: 100%; accent-color: var(--color-primary); cursor: pointer; }
+input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; padding: 2px; background: var(--color-bg); }
+
+.row-inline { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.row-inline label { min-width: 60px; margin: 0; }
+.range-value { font-size: var(--text-sm); color: var(--color-text-muted); min-width: 2.5em; text-align: right; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-5); border-radius: var(--radius-md);
+  font-size: var(--text-sm); font-weight: 500;
+  transition: background var(--transition-interactive), color var(--transition-interactive), box-shadow var(--transition-interactive);
+  cursor: pointer; border: none; text-decoration: none; white-space: nowrap;
+}
+.btn-primary { background: var(--color-primary); color: #fff; }
+.btn-primary:hover { background: var(--color-primary-hover); box-shadow: var(--shadow-md); }
+.btn-secondary { background: var(--color-surface-offset); color: var(--color-text); border: 1px solid var(--color-border); }
+.btn-secondary:hover { background: var(--color-surface-dynamic); }
+.btn-ghost { color: var(--color-text-muted); }
+.btn-ghost:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.btn-icon { padding: var(--space-2); border-radius: var(--radius-md); }
+.btn-sm { padding: var(--space-1) var(--space-3); font-size: var(--text-xs); }
+.action-bar { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-6); }
+
+/* ===== UPLOAD ZONE ===== */
+.upload-zone {
+  border: 2px dashed var(--color-border); border-radius: var(--radius-xl);
+  padding: var(--space-12) var(--space-8); text-align: center;
+  cursor: pointer; transition: border-color var(--transition-interactive), background var(--transition-interactive);
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+}
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--color-primary); background: oklch(from var(--color-primary) l c h / 0.04);
+}
+.upload-zone .upload-icon { color: var(--color-primary); margin-bottom: var(--space-2); }
+.upload-zone h3 { font-size: var(--text-base); font-weight: 600; }
+.upload-zone p { font-size: var(--text-sm); color: var(--color-text-muted); }
+#fileInput { display: none; }
+
+/* ===== IMAGE GRID ===== */
+.image-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.image-thumb {
+  position: relative; border-radius: var(--radius-lg); overflow: hidden;
+  background: var(--color-surface-offset); aspect-ratio: 1 / 1;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-interactive), transform var(--transition-interactive);
+}
+.image-thumb:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.image-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.image-thumb .remove-btn {
+  position: absolute; top: var(--space-1); right: var(--space-1);
+  width: 24px; height: 24px; border-radius: var(--radius-full);
+  background: oklch(0 0 0 / 0.55); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity var(--transition-interactive);
+  font-size: 11px; font-weight: 600;
+}
+.image-thumb:hover .remove-btn { opacity: 1; }
+.image-thumb .remove-btn:hover { background: oklch(0.45 0.2 10 / 0.9); }
+.status-badge {
+  position: absolute; bottom: var(--space-1); left: var(--space-1);
+  padding: 2px var(--space-2); border-radius: var(--radius-full);
+  font-size: 10px; font-weight: 600;
+}
+.status-badge.done { background: var(--color-success); color: #fff; }
+
+/* ===== PREVIEW AREA ===== */
+.preview-wrap {
+  background: repeating-conic-gradient(var(--color-surface-offset) 0% 25%, var(--color-bg) 0% 50%) 0 0 / 16px 16px;
+  border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  min-height: 300px; overflow: hidden; padding: var(--space-4);
+}
+#previewCanvas { max-width: 100%; max-height: 420px; object-fit: contain; border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+
+/* ===== WATERMARK OPTIONS TABS ===== */
+.tab-bar { display: flex; gap: var(--space-1); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-5); }
+.tab-btn {
+  padding: var(--space-2) var(--space-4); font-size: var(--text-sm); font-weight: 500;
+  color: var(--color-text-muted); border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent;
+  transition: color var(--transition-interactive), border-color var(--transition-interactive);
+  margin-bottom: -1px;
+}
+.tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.tab-btn:hover:not(.active) { color: var(--color-text); background: var(--color-surface-offset); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ===== PROGRESS ===== */
+.progress-wrap { margin-top: var(--space-4); }
+.progress-bar-bg { background: var(--color-surface-offset); border-radius: var(--radius-full); height: 8px; overflow: hidden; }
+.progress-bar-fill {
+  height: 100%; background: var(--color-primary); border-radius: var(--radius-full);
+  transition: width 0.3s ease; width: 0%;
+}
+.progress-text { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-1); }
+
+/* ===== STATS BAR ===== */
+.stats-bar {
+  display: flex; gap: var(--space-6); padding: var(--space-3) var(--space-5);
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+.stat-item { display: flex; flex-direction: column; gap: 2px; }
+.stat-value { font-size: var(--text-lg); font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.stat-label { font-size: var(--text-xs); color: var(--color-text-muted); }
+
+/* ===== POSITION GRID ===== */
+.position-grid { display: grid; grid-template-columns: repeat(3, 40px); gap: 4px; }
+.pos-btn {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border); background: var(--color-surface-offset);
+  cursor: pointer; transition: background var(--transition-interactive), border-color var(--transition-interactive);
+  display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--color-text-faint);
+}
+.pos-btn.active { background: var(--color-primary); border-color: var(--color-primary); }
+.pos-btn:hover:not(.active) { background: var(--color-primary-highlight); border-color: var(--color-primary); }
+
+/* ===== EMPTY STATE ===== */
+.empty-state { display: flex; flex-direction: column; align-items: center; text-align: center; padding: var(--space-16) var(--space-8); color: var(--color-text-muted); }
+.empty-state svg { color: var(--color-text-faint); margin-bottom: var(--space-4); }
+.empty-state h3 { font-size: var(--text-base); color: var(--color-text); margin-bottom: var(--space-2); }
+.empty-state p { font-size: var(--text-sm); max-width: 30ch; }
+
+/* ===== BADGE ===== */
+.badge { display: inline-flex; align-items: center; padding: 2px var(--space-2); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600; }
+.badge-primary { background: var(--color-primary-highlight); color: var(--color-primary-hover); }
+.badge-count { background: var(--color-primary); color: #fff; }
+
+/* ===== FOOTER ===== */
+footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var(--space-6); text-align: center; font-size: var(--text-xs); color: var(--color-text-faint); }
+
+/* ===== TOAST ===== */
+.toast-container { position: fixed; bottom: var(--space-6); right: var(--space-6); z-index: 1000; display: flex; flex-direction: column; gap: var(--space-2); }
+.toast {
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5); box-shadow: var(--shadow-lg);
+  font-size: var(--text-sm); display: flex; align-items: center; gap: var(--space-2);
+  animation: slideIn 0.3s ease; max-width: 320px;
+}
+.toast.success { border-left: 3px solid var(--color-success); }
+.toast.error { border-left: 3px solid var(--color-error); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+
+/* ===== WATERMARK TILE REPEAT ===== */
+.tile-section { display: none; }
+.tile-section.visible { display: block; }
+
+@media (max-width: 600px) {
+  main { padding: var(--space-4) var(--space-3); }
+  .stats-bar { gap: var(--space-4); }
+  .position-grid { grid-template-columns: repeat(3, 36px); }
+  .pos-btn { width: 36px; height: 36px; }
+}
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <svg class="logo-mark" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="11" height="11" rx="2" fill="currentColor" opacity="0.9"/>
+        <rect x="15" y="2" width="11" height="11" rx="2" fill="currentColor" opacity="0.5"/>
+        <rect x="2" y="15" width="11" height="11" rx="2" fill="currentColor" opacity="0.5"/>
+        <rect x="15" y="15" width="11" height="11" rx="2" fill="currentColor" opacity="0.2"/>
+        <line x1="6" y1="22" x2="22" y2="6" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+      </svg>
+      <span class="logo-text">浮水印工具</span>
+    </a>
+    <div class="header-actions">
+      <span class="badge badge-primary">免費 · 純前端處理</span>
+      <button class="theme-toggle" data-theme-toggle aria-label="切換暗色模式">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-value" id="statTotal">0</span>
+      <span class="stat-label">已載入圖片</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value" id="statDone">0</span>
+      <span class="stat-label">已處理完成</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value" id="statFormat">PNG</span>
+      <span class="stat-label">輸出格式</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value" id="statWmType">文字</span>
+      <span class="stat-label">浮水印類型</span>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- LEFT: UPLOAD + SETTINGS -->
+    <div>
+      <!-- UPLOAD ZONE -->
+      <div class="card">
+        <div class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          上傳圖片
+        </div>
+
+        <div class="upload-zone" id="dropZone" role="button" tabindex="0" aria-label="點擊或拖放上傳圖片">
+          <div class="upload-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <h3>拖放圖片到此處</h3>
+          <p>或點擊選擇檔案（支援 JPG、PNG、WebP、GIF）</p>
+          <button class="btn btn-secondary btn-sm" style="margin-top: var(--space-1);" onclick="document.getElementById('fileInput').click();event.stopPropagation()">選擇檔案</button>
+        </div>
+        <input type="file" id="fileInput" multiple accept="image/*">
+
+        <!-- Image Grid -->
+        <div id="imageGrid" class="image-grid" style="display:none;"></div>
+        <div id="emptyGrid"></div>
+      </div>
+
+      <!-- WATERMARK SETTINGS -->
+      <div class="card" style="margin-top:var(--space-6)">
+        <div class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          浮水印設定
+        </div>
+
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="text">文字浮水印</button>
+          <button class="tab-btn" data-tab="image">圖片浮水印</button>
+        </div>
+
+        <!-- TEXT WATERMARK -->
+        <div class="tab-panel active" id="tab-text">
+          <div class="form-group">
+            <label for="wmText">浮水印文字</label>
+            <input type="text" id="wmText" value="© 版權所有" placeholder="輸入浮水印文字...">
+          </div>
+          <div class="form-group">
+            <label for="wmFont">字型</label>
+            <select id="wmFont">
+              <option value="Arial">Arial</option>
+              <option value="'Noto Sans TC', sans-serif">Noto Sans TC（中文）</option>
+              <option value="Georgia">Georgia（Serif）</option>
+              <option value="'Courier New'">Courier New（等寬）</option>
+              <option value="Impact">Impact（粗體）</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>字體大小</label>
+            <div class="row-inline">
+              <input type="range" id="wmFontSize" min="10" max="200" value="48" style="flex:1">
+              <span class="range-value" id="wmFontSizeVal">48px</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>文字顏色</label>
+            <div class="row-inline">
+              <input type="color" id="wmColor" value="#ffffff">
+              <span class="range-value" style="color:var(--color-text-muted);font-size:var(--text-xs)">拖動選色</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- IMAGE WATERMARK -->
+        <div class="tab-panel" id="tab-image">
+          <div class="form-group">
+            <label>浮水印圖片（建議使用透明 PNG）</label>
+            <div style="display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap">
+              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('wmFileInput').click()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                選擇圖片
+              </button>
+              <span id="wmImgLabel" style="font-size:var(--text-xs);color:var(--color-text-muted)">未選擇</span>
+            </div>
+            <input type="file" id="wmFileInput" accept="image/*" style="display:none">
+          </div>
+          <div class="form-group">
+            <label>浮水印大小（相對於圖片寬度）</label>
+            <div class="row-inline">
+              <input type="range" id="wmImgSize" min="5" max="80" value="25" style="flex:1">
+              <span class="range-value" id="wmImgSizeVal">25%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHARED SETTINGS -->
+        <hr style="border:none;border-top:1px solid var(--color-divider);margin:var(--space-4) 0">
+
+        <div class="form-group">
+          <label>透明度</label>
+          <div class="row-inline">
+            <input type="range" id="wmOpacity" min="5" max="100" value="40" style="flex:1">
+            <span class="range-value" id="wmOpacityVal">40%</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>旋轉角度</label>
+          <div class="row-inline">
+            <input type="range" id="wmRotation" min="-180" max="180" value="-30" style="flex:1">
+            <span class="range-value" id="wmRotationVal">-30°</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>浮水印位置</label>
+          <div style="display:flex;gap:var(--space-6);align-items:center;flex-wrap:wrap">
+            <div class="position-grid">
+              <button class="pos-btn" data-pos="top-left" aria-label="左上">↖</button>
+              <button class="pos-btn" data-pos="top-center" aria-label="上中">↑</button>
+              <button class="pos-btn" data-pos="top-right" aria-label="右上">↗</button>
+              <button class="pos-btn" data-pos="center-left" aria-label="左中">←</button>
+              <button class="pos-btn active" data-pos="center" aria-label="置中">●</button>
+              <button class="pos-btn" data-pos="center-right" aria-label="右中">→</button>
+              <button class="pos-btn" data-pos="bottom-left" aria-label="左下">↙</button>
+              <button class="pos-btn" data-pos="bottom-center" aria-label="下中">↓</button>
+              <button class="pos-btn" data-pos="bottom-right" aria-label="右下">↘</button>
+            </div>
+            <div>
+              <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:500;cursor:pointer">
+                <input type="checkbox" id="wmTile" style="accent-color:var(--color-primary);width:16px;height:16px">
+                平鋪模式
+              </label>
+              <div class="tile-section" id="tileSection" style="margin-top:var(--space-3)">
+                <label>間距</label>
+                <div class="row-inline">
+                  <input type="range" id="wmTileGap" min="0" max="200" value="60" style="flex:1">
+                  <span class="range-value" id="wmTileGapVal">60px</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--color-divider);margin:var(--space-4) 0">
+
+        <!-- OUTPUT SETTINGS -->
+        <div class="form-group">
+          <label for="outputFormat">輸出格式</label>
+          <select id="outputFormat">
+            <option value="image/png">PNG（無損，支援透明）</option>
+            <option value="image/jpeg">JPEG（較小檔案）</option>
+            <option value="image/webp">WebP（推薦）</option>
+          </select>
+        </div>
+        <div class="form-group" id="qualityGroup">
+          <label>輸出品質（PNG 不適用）</label>
+          <div class="row-inline">
+            <input type="range" id="outputQuality" min="50" max="100" value="90" style="flex:1">
+            <span class="range-value" id="outputQualityVal">90%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: PREVIEW -->
+    <div>
+      <div class="card" style="position:sticky;top:80px">
+        <div class="section-title" style="justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:var(--space-2)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            即時預覽
+          </span>
+          <button class="btn btn-ghost btn-sm" id="refreshPreview" title="重新整理預覽">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+            更新
+          </button>
+        </div>
+
+        <div class="preview-wrap">
+          <div id="previewEmpty" class="empty-state" style="padding:var(--space-10)">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <h3>尚未載入圖片</h3>
+            <p>上傳圖片後可預覽浮水印效果</p>
+          </div>
+          <canvas id="previewCanvas" style="display:none"></canvas>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-primary" id="btnProcess" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            開始批次處理
+          </button>
+          <button class="btn btn-secondary" id="btnDownloadAll" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            下載全部（ZIP）
+          </button>
+          <button class="btn btn-ghost btn-sm" id="btnClear">清除全部</button>
+        </div>
+
+        <!-- PROGRESS -->
+        <div class="progress-wrap" id="progressWrap" style="display:none">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+          <div class="progress-text" id="progressText">處理中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>圖片完全在您的瀏覽器本地處理，不會上傳至任何伺服器。&nbsp;·&nbsp; 批次浮水印工具</footer>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ===== STATE =====
+const state = {
+  files: [],
+  processedBlobs: [],
+  wmImage: null,
+  selectedPos: 'center',
+  activeTab: 'text',
+  previewIndex: 0,
+};
+
+// ===== THEME TOGGLE =====
+(function(){
+  const t = document.querySelector('[data-theme-toggle]');
+  const r = document.documentElement;
+  let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  r.setAttribute('data-theme', d);
+  t.innerHTML = d === 'dark'
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  if(t) t.addEventListener('click', () => {
+    d = d === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', d);
+    t.innerHTML = d === 'dark'
+      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  });
+})();
+
+// ===== TOAST =====
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span><span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'slideOut 0.3s ease forwards';
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
+
+// ===== RANGE INPUTS =====
+function bindRange(id, valId, suffix) {
+  const el = document.getElementById(id);
+  const val = document.getElementById(valId);
+  el.addEventListener('input', () => { val.textContent = el.value + suffix; updatePreview(); });
+}
+bindRange('wmFontSize', 'wmFontSizeVal', 'px');
+bindRange('wmOpacity', 'wmOpacityVal', '%');
+bindRange('wmRotation', 'wmRotationVal', '°');
+bindRange('wmImgSize', 'wmImgSizeVal', '%');
+bindRange('wmTileGap', 'wmTileGapVal', 'px');
+bindRange('outputQuality', 'outputQualityVal', '%');
+
+// ===== TABS =====
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    state.activeTab = btn.dataset.tab;
+    document.getElementById('statWmType').textContent = btn.dataset.tab === 'text' ? '文字' : '圖片';
+    updatePreview();
+  });
+});
+
+// ===== POSITION GRID =====
+document.querySelectorAll('.pos-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.selectedPos = btn.dataset.pos;
+    updatePreview();
+  });
+});
+
+// ===== TILE TOGGLE =====
+document.getElementById('wmTile').addEventListener('change', function() {
+  document.getElementById('tileSection').classList.toggle('visible', this.checked);
+  updatePreview();
+});
+
+// ===== TEXT/COLOR UPDATES =====
+['wmText','wmFont','wmColor','outputFormat'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updatePreview);
+  document.getElementById(id).addEventListener('change', updatePreview);
+});
+document.getElementById('outputFormat').addEventListener('change', function() {
+  document.getElementById('statFormat').textContent = this.value.split('/')[1].toUpperCase();
+  const qg = document.getElementById('qualityGroup');
+  qg.style.opacity = this.value === 'image/png' ? '0.4' : '1';
+  qg.style.pointerEvents = this.value === 'image/png' ? 'none' : '';
+});
+
+// ===== FILE UPLOAD =====
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  handleFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+});
+fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
+
+function handleFiles(newFiles) {
+  if (!newFiles.length) return;
+  newFiles.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        state.files.push({ file: f, url: e.target.result, img, processed: false });
+        renderGrid();
+        updateStats();
+        if (state.files.length === 1) {
+          state.previewIndex = 0;
+          updatePreview();
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+// ===== WATERMARK IMAGE UPLOAD =====
+document.getElementById('wmFileInput').addEventListener('change', function() {
+  if (!this.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      state.wmImage = img;
+      document.getElementById('wmImgLabel').textContent = '✓ ' + this.files[0].name;
+      updatePreview();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(this.files[0]);
+});
+
+// ===== RENDER GRID =====
+function renderGrid() {
+  const grid = document.getElementById('imageGrid');
+  if (!state.files.length) {
+    grid.style.display = 'none';
+    return;
+  }
+  grid.style.display = 'grid';
+  grid.innerHTML = '';
+  state.files.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'image-thumb';
+    div.innerHTML = `
+      <img src="${f.url}" alt="${f.file.name}" loading="lazy" width="160" height="160">
+      <button class="remove-btn" aria-label="移除圖片" data-i="${i}">✕</button>
+      ${f.processed ? '<span class="status-badge done">完成</span>' : ''}
+    `;
+    div.querySelector('img').addEventListener('click', () => { state.previewIndex = i; updatePreview(); });
+    div.querySelector('.remove-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      state.files.splice(i, 1);
+      state.processedBlobs.splice(i, 1);
+      if (state.previewIndex >= state.files.length) state.previewIndex = Math.max(0, state.files.length - 1);
+      renderGrid(); updateStats(); updatePreview();
+    });
+    grid.appendChild(div);
+  });
+  document.getElementById('btnProcess').disabled = state.files.length === 0;
+}
+
+// ===== WATERMARK ENGINE =====
+function applyWatermark(img) {
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+
+  const opacity = parseFloat(document.getElementById('wmOpacity').value) / 100;
+  const rotation = parseFloat(document.getElementById('wmRotation').value) * (Math.PI / 180);
+  const tiled = document.getElementById('wmTile').checked;
+  const pos = state.selectedPos;
+
+  ctx.globalAlpha = opacity;
+
+  if (state.activeTab === 'text') {
+    const text = document.getElementById('wmText').value || '浮水印';
+    const fontSize = parseInt(document.getElementById('wmFontSize').value);
+    const font = document.getElementById('wmFont').value;
+    const color = document.getElementById('wmColor').value;
+
+    ctx.font = `${fontSize}px ${font}`;
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+
+    const metrics = ctx.measureText(text);
+    const tw = metrics.width;
+    const th = fontSize;
+
+    if (tiled) {
+      const gap = parseInt(document.getElementById('wmTileGap').value);
+      const stepX = tw + gap;
+      const stepY = th + gap;
+      for (let y = -canvas.height; y < canvas.height * 2; y += stepY) {
+        for (let x = -canvas.width; x < canvas.width * 2; x += stepX) {
+          ctx.save();
+          ctx.translate(x + tw/2, y + th/2);
+          ctx.rotate(rotation);
+          ctx.fillText(text, 0, 0);
+          ctx.restore();
+        }
+      }
+    } else {
+      const {x, y} = getPosition(pos, canvas.width, canvas.height, tw, th);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      ctx.fillText(text, 0, 0);
+      ctx.restore();
+    }
+
+  } else {
+    const wmImg = state.wmImage;
+    if (!wmImg) return canvas;
+    const sizePercent = parseInt(document.getElementById('wmImgSize').value) / 100;
+    const scale = (canvas.width * sizePercent) / wmImg.width;
+    const ww = wmImg.width * scale;
+    const wh = wmImg.height * scale;
+
+    if (tiled) {
+      const gap = parseInt(document.getElementById('wmTileGap').value);
+      for (let y = -canvas.height; y < canvas.height * 2; y += wh + gap) {
+        for (let x = -canvas.width; x < canvas.width * 2; x += ww + gap) {
+          ctx.save();
+          ctx.translate(x + ww/2, y + wh/2);
+          ctx.rotate(rotation);
+          ctx.drawImage(wmImg, -ww/2, -wh/2, ww, wh);
+          ctx.restore();
+        }
+      }
+    } else {
+      const {x, y} = getPosition(pos, canvas.width, canvas.height, ww, wh);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      ctx.drawImage(wmImg, -ww/2, -wh/2, ww, wh);
+      ctx.restore();
+    }
+  }
+
+  ctx.globalAlpha = 1;
+  return canvas;
+}
+
+function getPosition(pos, cw, ch, ww, wh) {
+  const margin = Math.min(cw, ch) * 0.05;
+  const map = {
+    'top-left':      [margin + ww/2, margin + wh/2],
+    'top-center':    [cw/2, margin + wh/2],
+    'top-right':     [cw - margin - ww/2, margin + wh/2],
+    'center-left':   [margin + ww/2, ch/2],
+    'center':        [cw/2, ch/2],
+    'center-right':  [cw - margin - ww/2, ch/2],
+    'bottom-left':   [margin + ww/2, ch - margin - wh/2],
+    'bottom-center': [cw/2, ch - margin - wh/2],
+    'bottom-right':  [cw - margin - ww/2, ch - margin - wh/2],
+  };
+  const [x, y] = map[pos] || [cw/2, ch/2];
+  return {x, y};
+}
+
+// ===== PREVIEW =====
+function updatePreview() {
+  if (!state.files.length) {
+    document.getElementById('previewCanvas').style.display = 'none';
+    document.getElementById('previewEmpty').style.display = '';
+    return;
+  }
+  const f = state.files[state.previewIndex];
+  if (!f) return;
+  const canvas = applyWatermark(f.img);
+  const previewCanvas = document.getElementById('previewCanvas');
+  previewCanvas.width = canvas.width;
+  previewCanvas.height = canvas.height;
+  const ctx = previewCanvas.getContext('2d');
+  ctx.drawImage(canvas, 0, 0);
+  previewCanvas.style.display = '';
+  document.getElementById('previewEmpty').style.display = 'none';
+}
+
+document.getElementById('refreshPreview').addEventListener('click', updatePreview);
+
+// ===== BATCH PROCESS =====
+document.getElementById('btnProcess').addEventListener('click', async () => {
+  if (!state.files.length) return;
+  const btn = document.getElementById('btnProcess');
+  btn.disabled = true;
+  const progressWrap = document.getElementById('progressWrap');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  progressWrap.style.display = '';
+  state.processedBlobs = [];
+  const format = document.getElementById('outputFormat').value;
+  const quality = parseInt(document.getElementById('outputQuality').value) / 100;
+
+  for (let i = 0; i < state.files.length; i++) {
+    progressText.textContent = `處理中 ${i + 1} / ${state.files.length}`;
+    progressFill.style.width = ((i + 1) / state.files.length * 100) + '%';
+    state.files[i].processed = false;
+    renderGrid();
+    await new Promise(r => setTimeout(r, 10));
+    const canvas = applyWatermark(state.files[i].img);
+    const blob = await new Promise(r => canvas.toBlob(r, format, quality));
+    state.processedBlobs.push(blob);
+    state.files[i].processed = true;
+  }
+
+  renderGrid();
+  updateStats();
+  progressText.textContent = `✓ 全部完成！共 ${state.files.length} 張`;
+  document.getElementById('btnDownloadAll').disabled = false;
+  btn.disabled = false;
+  showToast(`${state.files.length} 張圖片處理完成！`);
+});
+
+// ===== DOWNLOAD ALL (ZIP) =====
+document.getElementById('btnDownloadAll').addEventListener('click', async () => {
+  if (!state.processedBlobs.length) { showToast('請先執行批次處理', 'error'); return; }
+  const format = document.getElementById('outputFormat').value;
+  const ext = format.split('/')[1];
+  if (!window.JSZip) {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    document.head.appendChild(s);
+    await new Promise(r => s.onload = r);
+  }
+  const zip = new JSZip();
+  state.processedBlobs.forEach((blob, i) => {
+    const orig = state.files[i].file.name.replace(/\.[^.]+$/, '');
+    zip.file(`${orig}_watermark.${ext}`, blob);
+  });
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(zipBlob);
+  a.download = 'watermarked_images.zip';
+  a.click();
+  showToast('ZIP 下載已開始！');
+});
+
+// ===== CLEAR =====
+document.getElementById('btnClear').addEventListener('click', () => {
+  state.files = [];
+  state.processedBlobs = [];
+  state.previewIndex = 0;
+  renderGrid();
+  updateStats();
+  updatePreview();
+  document.getElementById('btnDownloadAll').disabled = true;
+  document.getElementById('btnProcess').disabled = true;
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  showToast('已清除所有圖片');
+});
+
+// ===== STATS =====
+function updateStats() {
+  document.getElementById('statTotal').textContent = state.files.length;
+  document.getElementById('statDone').textContent = state.files.filter(f => f.processed).length;
+}
+</script>
+</body>
+</html>
