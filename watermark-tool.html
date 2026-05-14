@@ -15,14 +15,12 @@
   --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
   --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
   --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
-
   --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
   --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
   --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
   --space-16: 4rem;
-
   --color-bg: #f7f6f2;
-  --color-surface: rgba(255,255,255,0.82);
+  --color-surface: rgba(255,255,255,0.92);
   --color-surface-2: rgba(255,255,255,0.9);
   --color-surface-offset: #eef4ff;
   --color-surface-dynamic: #e6e4df;
@@ -36,13 +34,12 @@
   --color-primary-highlight: #dbeafe;
   --color-error: #a12c7b;
   --color-success: #437a22;
-
   --radius-sm: 0.375rem; --radius-md: 0.5rem;
   --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
   --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-  --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 16px 40px rgba(15, 23, 42, 0.10);
-  --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.16);
+  --shadow-sm: 0 8px 24px rgba(15,23,42,0.06);
+  --shadow-md: 0 16px 40px rgba(15,23,42,0.10);
+  --shadow-lg: 0 24px 60px rgba(15,23,42,0.16);
   --font-body: 'Inter', system-ui, sans-serif;
   --content-default: 1100px;
 }
@@ -66,25 +63,25 @@ button { cursor: pointer; background: none; border: none; }
 /* ===== LAYOUT ===== */
 .app-wrapper { display: flex; flex-direction: column; min-height: 100dvh; }
 
-/* ★ 修正1: header overflow visible，讓 dropdown 不被裁切 */
+/* ★ 修正1+2: header 不能有 overflow:hidden，z-index 要夠高 */
 header {
-  position: sticky; top: 0; z-index: 100;
+  position: sticky; top: 0;
+  z-index: 200;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
-  overflow: visible;
+  /* 不設 overflow，讓 dropdown 能溢出 */
 }
 .header-inner {
   max-width: var(--content-default); margin: 0 auto;
   padding: var(--space-3) var(--space-6);
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
-  overflow: visible;
 }
 .logo { display: flex; align-items: center; gap: var(--space-3); text-decoration: none; color: var(--color-text); }
 .logo-img { height: 36px; width: auto; display: block; object-fit: contain; }
 .logo-divider { width: 1px; height: 22px; background: var(--color-border); flex-shrink: 0; }
 .logo-text { font-size: var(--text-sm); font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
-.header-actions { display: flex; align-items: center; gap: var(--space-2); overflow: visible; }
+.header-actions { display: flex; align-items: center; gap: var(--space-2); }
 
 /* ===== AUTH BUTTON ===== */
 .auth-btn {
@@ -123,19 +120,19 @@ main { flex: 1; max-width: var(--content-default); margin: 0 auto; width: 100%; 
 .form-group:last-child { margin-bottom: 0; }
 label { font-size: var(--text-sm); font-weight: 500; color: var(--color-text-muted); }
 input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
-  background: radial-gradient(circle at top, #ffffff 0%, #f4f7fb 38%, #eef2f7 100%); border: 1px solid var(--color-border);
+  background: #fff; border: 1px solid var(--color-border);
   border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm); color: var(--color-text);
   transition: border-color var(--transition-interactive), box-shadow var(--transition-interactive);
   width: 100%;
 }
-input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="password"]:focus, select:focus, textarea:focus {
+input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus,
+input[type="password"]:focus, select:focus, textarea:focus {
   border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-highlight);
   outline: none;
 }
 input[type="range"] { width: 100%; accent-color: var(--color-primary); cursor: pointer; }
-input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; padding: 2px; background: radial-gradient(circle at top, #ffffff 0%, #f4f7fb 38%, #eef2f7 100%); }
-
+input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; padding: 2px; background: #fff; }
 .row-inline { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .row-inline label { min-width: 60px; margin: 0; }
 .range-value { font-size: var(--text-sm); color: var(--color-text-muted); min-width: 2.5em; text-align: right; }
@@ -167,10 +164,9 @@ input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-b
   padding: var(--space-12) var(--space-8); text-align: center;
   cursor: pointer; transition: border-color var(--transition-interactive), background var(--transition-interactive);
   display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(248,250,252,0.92));
 }
-.upload-zone:hover, .upload-zone.dragover {
-  border-color: var(--color-primary); background: rgba(37,99,235,0.04);
-}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--color-primary); background: rgba(37,99,235,0.04); }
 .upload-zone .upload-icon { color: var(--color-primary); margin-bottom: var(--space-2); }
 .upload-zone h3 { font-size: var(--text-base); font-weight: 600; }
 .upload-zone p { font-size: var(--text-sm); color: var(--color-text-muted); }
@@ -208,7 +204,7 @@ input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-b
 
 /* ===== PREVIEW AREA ===== */
 .preview-wrap {
-  background: repeating-conic-gradient(var(--color-surface-offset) 0% 25%, var(--color-bg) 0% 50%) 0 0 / 16px 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(241,245,249,0.95));
   border: 1px solid var(--color-border); border-radius: var(--radius-lg);
   display: flex; align-items: center; justify-content: center;
   min-height: 300px; overflow: hidden; padding: var(--space-4);
@@ -277,7 +273,7 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 /* ===== TOAST ===== */
 .toast-container { position: fixed; bottom: var(--space-6); right: var(--space-6); z-index: 9999; display: flex; flex-direction: column; gap: var(--space-2); }
 .toast {
-  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-5); box-shadow: var(--shadow-lg);
   font-size: var(--text-sm); display: flex; align-items: center; gap: var(--space-2);
   animation: slideIn 0.3s ease; max-width: 320px;
@@ -291,24 +287,34 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 .tile-section { display: none; }
 .tile-section.visible { display: block; }
 
-/* ===== AUTH MODAL ===== */
-/* ★ 修正2: z-index 9999，確保彈出在最上層 */
+/* ===== AUTH MODAL =====
+   ★ 修正1: position:fixed 不能被父層的 position:relative + z-index 覆蓋
+   解法：modal-overlay 放在 body 直接子層，且 z-index 9999
+   CSS 中完全不能對 .modal-overlay 設 position:relative
+*/
 .modal-overlay {
-  position: fixed; inset: 0; z-index: 9999;
-  background: rgba(10,10,10,0.55);
-  display: flex; align-items: center; justify-content: center;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10,10,10,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: var(--space-4);
-  opacity: 0; pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
   transition: opacity 0.2s ease;
 }
 .modal-overlay.open { opacity: 1; pointer-events: all; }
 .modal {
-  background: #fff; border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl); padding: var(--space-8);
-  width: 100%; max-width: 420px; box-shadow: var(--shadow-lg);
-  transform: translateY(12px);
-  transition: transform 0.2s ease;
-  position: relative; z-index: 10000;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  width: 100%; max-width: 420px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(16px);
+  transition: transform 0.25s ease;
 }
 .modal-overlay.open .modal { transform: translateY(0); }
 .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
@@ -346,11 +352,7 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
   margin-bottom: var(--space-4);
 }
 .captcha-question { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); white-space: nowrap; }
-.captcha-input {
-  width: 72px !important; text-align: center;
-  font-size: var(--text-sm); font-weight: 700;
-  margin: 0 !important;
-}
+.captcha-input { width: 72px !important; text-align: center; font-size: var(--text-sm); font-weight: 700; margin: 0 !important; }
 .captcha-refresh {
   width: 28px; height: 28px; border-radius: var(--radius-md);
   display: flex; align-items: center; justify-content: center;
@@ -360,18 +362,9 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 .captcha-refresh:hover { background: var(--color-surface-dynamic); color: var(--color-text); }
 
 /* ===== REMEMBER ME ===== */
-.remember-row {
-  display: flex; align-items: center; gap: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-.remember-row input[type="checkbox"] {
-  width: 16px; height: 16px; accent-color: var(--color-primary);
-  cursor: pointer; flex-shrink: 0;
-}
-.remember-row label {
-  font-size: var(--text-xs); color: var(--color-text-muted);
-  cursor: pointer; margin: 0;
-}
+.remember-row { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); }
+.remember-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-primary); cursor: pointer; flex-shrink: 0; }
+.remember-row label { font-size: var(--text-xs); color: var(--color-text-muted); cursor: pointer; margin: 0; }
 
 /* ===== PRESET BANNER ===== */
 .preset-banner {
@@ -388,15 +381,22 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 .preset-banner-text { flex: 1; color: var(--color-primary-hover); }
 .preset-banner-actions { display: flex; gap: var(--space-2); }
 
-/* ===== USER DROPDOWN ===== */
-/* ★ 修正1: z-index 9000 > header z-index 100 */
+/* ===== USER DROPDOWN =====
+   ★ 修正2: z-index 9000, header 不設 overflow
+*/
 .user-menu-wrap { position: relative; }
 .user-dropdown {
-  position: absolute; top: calc(100% + 6px); right: 0;
-  background: #fff; border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
-  min-width: 210px; padding: var(--space-2);
-  display: none; z-index: 9000;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(15,23,42,0.18);
+  min-width: 210px;
+  padding: var(--space-2);
+  display: none;
+  z-index: 9000;
 }
 .user-dropdown.open { display: block; }
 .dropdown-item {
@@ -423,6 +423,7 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
   .logo-divider { display: none; }
 }
 
+/* ===== AMBIENT GLOW ===== */
 body::before {
   content: "";
   position: fixed;
@@ -434,7 +435,16 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
-.app-wrapper, header, main, footer, .toast-container, .modal-overlay { position: relative; z-index: 1; }
+
+/* ★ 修正1核心: 不對 .modal-overlay 設 position:relative
+   只對 .app-wrapper / header / main / footer 設 stacking context
+   modal-overlay 是 body 直接子元素，固定定位不受影響 */
+.app-wrapper { position: relative; z-index: 1; }
+header { z-index: 200; }
+main { position: relative; z-index: 1; }
+footer { position: relative; z-index: 1; }
+.toast-container { z-index: 9999; }
+
 .card {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -443,12 +453,6 @@ body::before {
 .upload-zone, .preview-wrap, .stats-bar, .modal {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-}
-.upload-zone {
-  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(248,250,252,0.92));
-}
-.preview-wrap {
-  background: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(241,245,249,0.95));
 }
 .logo-img { filter: drop-shadow(0 6px 18px rgba(37,99,235,.14)); }
 .loading-pulse { animation: breathingGlow 1.6s ease-in-out infinite; }
@@ -487,17 +491,15 @@ body::before {
     </a>
     <div class="header-actions">
       <span class="badge badge-primary">免費 · 純前端處理</span>
-
-      <!-- 未登入狀態 -->
+      <!-- 未登入 -->
       <button class="auth-btn" id="btnOpenAuth" style="display:flex">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         登入 / 註冊
       </button>
-
-      <!-- 已登入狀態 -->
+      <!-- 已登入 -->
       <div class="user-menu-wrap" id="userMenuWrap" style="display:none">
         <button class="auth-btn logged-in" id="btnUserMenu">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span id="headerUsername">會員</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
@@ -522,7 +524,6 @@ body::before {
           </button>
         </div>
       </div>
-      <!-- ★ 修正2: 移除 theme-toggle 按鈕，僅保留亮色模式 -->
     </div>
   </div>
 </header>
@@ -540,57 +541,41 @@ body::before {
 
   <!-- STATS BAR -->
   <div class="stats-bar">
-    <div class="stat-item">
-      <span class="stat-value" id="statTotal">0</span>
-      <span class="stat-label">已載入圖片</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value" id="statDone">0</span>
-      <span class="stat-label">已處理完成</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value" id="statFormat">PNG</span>
-      <span class="stat-label">輸出格式</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value" id="statWmType">文字</span>
-      <span class="stat-label">浮水印類型</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value" id="statCurrentSize">—</span>
-      <span class="stat-label">目前照片尺寸</span>
-    </div>
+    <div class="stat-item"><span class="stat-value" id="statTotal">0</span><span class="stat-label">已載入圖片</span></div>
+    <div class="stat-item"><span class="stat-value" id="statDone">0</span><span class="stat-label">已處理完成</span></div>
+    <div class="stat-item"><span class="stat-value" id="statFormat">PNG</span><span class="stat-label">輸出格式</span></div>
+    <div class="stat-item"><span class="stat-value" id="statWmType">文字</span><span class="stat-label">浮水印類型</span></div>
+    <div class="stat-item"><span class="stat-value" id="statCurrentSize">—</span><span class="stat-label">目前照片尺寸</span></div>
   </div>
 
   <div class="two-col">
-    <!-- LEFT: UPLOAD + SETTINGS -->
+    <!-- LEFT -->
     <div>
-      <!-- UPLOAD ZONE -->
+      <!-- UPLOAD -->
       <div class="card">
         <div class="section-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           上傳圖片
         </div>
         <div class="upload-zone" id="dropZone" role="button" tabindex="0" aria-label="點擊或拖放上傳圖片">
           <div class="upload-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
             </svg>
           </div>
           <h3>拖放圖片到此處</h3>
           <p>或點擊選擇檔案（支援 JPG、PNG、WebP、GIF）</p>
-          <button class="btn btn-secondary btn-sm" style="margin-top: var(--space-1);" onclick="document.getElementById('fileInput').click();event.stopPropagation()">選擇檔案</button>
+          <button class="btn btn-secondary btn-sm" style="margin-top:var(--space-1)" onclick="document.getElementById('fileInput').click();event.stopPropagation()">選擇檔案</button>
         </div>
         <input type="file" id="fileInput" multiple accept="image/*">
         <div id="imageGrid" class="image-grid" style="display:none;"></div>
-        <div id="emptyGrid"></div>
       </div>
 
       <!-- WATERMARK SETTINGS -->
       <div class="card" style="margin-top:var(--space-6)">
         <div class="section-title" style="justify-content:space-between">
           <span style="display:flex;align-items:center;gap:var(--space-2)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             浮水印設定
           </span>
           <button class="btn btn-secondary btn-sm" id="btnSavePresetInline" title="儲存目前設定（需登入）" style="display:none">
@@ -604,7 +589,7 @@ body::before {
           <button class="tab-btn" data-tab="image">圖片浮水印</button>
         </div>
 
-        <!-- TEXT WATERMARK -->
+        <!-- TEXT TAB -->
         <div class="tab-panel active" id="tab-text">
           <div class="form-group">
             <label for="wmText">浮水印文字</label>
@@ -631,12 +616,12 @@ body::before {
             <label>文字顏色</label>
             <div class="row-inline">
               <input type="color" id="wmColor" value="#ffffff">
-              <span class="range-value" style="color:var(--color-text-muted);font-size:var(--text-xs)">拖動選色</span>
+              <span style="font-size:var(--text-xs);color:var(--color-text-muted)">拖動選色</span>
             </div>
           </div>
         </div>
 
-        <!-- IMAGE WATERMARK -->
+        <!-- IMAGE TAB -->
         <div class="tab-panel" id="tab-image">
           <div class="form-group">
             <label>浮水印圖片（建議使用透明 PNG）</label>
@@ -658,9 +643,8 @@ body::before {
           </div>
         </div>
 
-        <!-- SHARED SETTINGS -->
+        <!-- SHARED -->
         <hr style="border:none;border-top:1px solid var(--color-divider);margin:var(--space-4) 0">
-
         <div class="form-group">
           <label>透明度</label>
           <div class="row-inline">
@@ -668,7 +652,6 @@ body::before {
             <span class="range-value" id="wmOpacityVal">40%</span>
           </div>
         </div>
-
         <div class="form-group">
           <label>旋轉角度</label>
           <div class="row-inline">
@@ -676,20 +659,19 @@ body::before {
             <span class="range-value" id="wmRotationVal">-30°</span>
           </div>
         </div>
-
         <div class="form-group">
           <label>浮水印位置</label>
           <div style="display:flex;gap:var(--space-6);align-items:center;flex-wrap:wrap">
             <div class="position-grid">
-              <button class="pos-btn" data-pos="top-left" aria-label="左上">↖</button>
-              <button class="pos-btn" data-pos="top-center" aria-label="上中">↑</button>
-              <button class="pos-btn" data-pos="top-right" aria-label="右上">↗</button>
-              <button class="pos-btn" data-pos="center-left" aria-label="左中">←</button>
-              <button class="pos-btn active" data-pos="center" aria-label="置中">●</button>
-              <button class="pos-btn" data-pos="center-right" aria-label="右中">→</button>
-              <button class="pos-btn" data-pos="bottom-left" aria-label="左下">↙</button>
-              <button class="pos-btn" data-pos="bottom-center" aria-label="下中">↓</button>
-              <button class="pos-btn" data-pos="bottom-right" aria-label="右下">↘</button>
+              <button class="pos-btn" data-pos="top-left">↖</button>
+              <button class="pos-btn" data-pos="top-center">↑</button>
+              <button class="pos-btn" data-pos="top-right">↗</button>
+              <button class="pos-btn" data-pos="center-left">←</button>
+              <button class="pos-btn active" data-pos="center">●</button>
+              <button class="pos-btn" data-pos="center-right">→</button>
+              <button class="pos-btn" data-pos="bottom-left">↙</button>
+              <button class="pos-btn" data-pos="bottom-center">↓</button>
+              <button class="pos-btn" data-pos="bottom-right">↘</button>
             </div>
             <div>
               <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:500;cursor:pointer">
@@ -706,10 +688,8 @@ body::before {
             </div>
           </div>
         </div>
-
         <hr style="border:none;border-top:1px solid var(--color-divider);margin:var(--space-4) 0">
-
-        <!-- OUTPUT SETTINGS -->
+        <!-- OUTPUT -->
         <div class="form-group">
           <label for="outputFormat">輸出格式</label>
           <select id="outputFormat">
@@ -726,6 +706,7 @@ body::before {
           </div>
         </div>
 
+        <!-- RESIZE -->
         <div class="card" style="margin-top:var(--space-6)">
           <div class="section-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v18"/><path d="M3 8h18"/></svg>
@@ -754,14 +735,8 @@ body::before {
             </label>
           </div>
           <div class="photo-info-grid">
-            <div class="info-chip">
-              <span class="info-chip-label">原始尺寸</span>
-              <span class="info-chip-value" id="currentImageSize">—</span>
-            </div>
-            <div class="info-chip">
-              <span class="info-chip-label">輸出尺寸</span>
-              <span class="info-chip-value" id="outputImageSize">—</span>
-            </div>
+            <div class="info-chip"><span class="info-chip-label">原始尺寸</span><span class="info-chip-value" id="currentImageSize">—</span></div>
+            <div class="info-chip"><span class="info-chip-label">輸出尺寸</span><span class="info-chip-value" id="outputImageSize">—</span></div>
           </div>
         </div>
       </div>
@@ -772,42 +747,38 @@ body::before {
       <div class="card" style="position:sticky;top:80px">
         <div class="section-title" style="justify-content:space-between">
           <span style="display:flex;align-items:center;gap:var(--space-2)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             即時預覽
           </span>
-          <button class="btn btn-ghost btn-sm" id="refreshPreview" title="重新整理預覽">
+          <button class="btn btn-ghost btn-sm" id="refreshPreview">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
             更新
           </button>
         </div>
-
         <div class="preview-wrap">
           <div id="previewEmpty" class="empty-state" style="padding:var(--space-10)">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             <h3>尚未載入圖片</h3>
             <p>上傳圖片後可預覽浮水印效果</p>
           </div>
-          <div id="previewLoading" class="empty-state loading-pulse" style="display:none;padding:var(--space-10)"><h3>預覽載入中</h3><p>正在生成高品質即時預覽</p></div>
+          <div id="previewLoading" class="empty-state loading-pulse" style="display:none;padding:var(--space-10)"><h3>預覽載入中</h3></div>
           <canvas id="previewCanvas" style="display:none"></canvas>
         </div>
-
         <div class="photo-info-grid" style="margin-bottom:var(--space-4)">
           <div class="info-chip"><span class="info-chip-label">檔案名稱</span><span class="info-chip-value" id="currentFileName">—</span></div>
           <div class="info-chip"><span class="info-chip-label">處理狀態</span><span class="info-chip-value" id="currentProcessStatus">待處理</span></div>
         </div>
-
         <div class="action-bar">
           <button class="btn btn-primary" id="btnProcess" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             開始批次處理
           </button>
           <button class="btn btn-secondary" id="btnDownloadAll" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             下載全部（ZIP）
           </button>
           <button class="btn btn-ghost btn-sm" id="btnClear">清除全部</button>
         </div>
-
         <div class="progress-wrap" id="progressWrap" style="display:none">
           <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
           <div class="progress-text" id="progressText">處理中...</div>
@@ -818,12 +789,12 @@ body::before {
 </main>
 
 <footer>圖片完全在您的瀏覽器本地處理，不會上傳至任何伺服器。&nbsp;·&nbsp; 專業批次浮水印工作台</footer>
-</div>
+</div><!-- end app-wrapper -->
 
-<!-- TOAST CONTAINER -->
+<!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- AUTH MODAL -->
+<!-- ★ 修正1: AUTH MODAL 放在 body 直接子層，在 .app-wrapper 之外 -->
 <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal">
     <div class="modal-header">
@@ -836,8 +807,7 @@ body::before {
       <button class="modal-tab active" data-modal-tab="login">登入</button>
       <button class="modal-tab" data-modal-tab="register">註冊新帳號</button>
     </div>
-
-    <!-- LOGIN FORM -->
+    <!-- LOGIN -->
     <div class="modal-form active" id="modal-login">
       <div class="form-group">
         <label for="loginUsername">帳號（用戶名）</label>
@@ -856,12 +826,9 @@ body::before {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
         登入
       </button>
-      <div class="modal-footer">
-        還沒有帳號？<a onclick="switchModalTab('register')">立即免費註冊</a>
-      </div>
+      <div class="modal-footer">還沒有帳號？<a onclick="switchModalTab('register')">立即免費註冊</a></div>
     </div>
-
-    <!-- REGISTER FORM -->
+    <!-- REGISTER -->
     <div class="modal-form" id="modal-register">
       <div class="form-group">
         <label for="regUsername">帳號（用戶名）</label>
@@ -875,10 +842,10 @@ body::before {
         <label for="regPassword">密碼</label>
         <input type="password" id="regPassword" placeholder="至少 8 個字元" autocomplete="new-password">
       </div>
-      <div class="captcha-wrap" id="captchaWrap">
+      <div class="captcha-wrap">
         <span class="captcha-question" id="captchaQuestion">載入中...</span>
         <input type="number" class="captcha-input" id="captchaInput" placeholder="答案" min="0" max="99" autocomplete="off">
-        <button type="button" class="captcha-refresh" id="captchaRefresh" aria-label="換一題" title="換一題">
+        <button type="button" class="captcha-refresh" id="captchaRefresh" title="換一題">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
         </button>
       </div>
@@ -887,9 +854,7 @@ body::before {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
         建立帳號
       </button>
-      <div class="modal-footer">
-        已有帳號？<a onclick="switchModalTab('login')">直接登入</a>
-      </div>
+      <div class="modal-footer">已有帳號？<a onclick="switchModalTab('login')">直接登入</a></div>
     </div>
   </div>
 </div>
@@ -900,7 +865,6 @@ const WP_URL = 'https://watermark.wulk.cc';
 const API = {
   token:    `${WP_URL}/wp-json/jwt-auth/v1/token`,
   register: `${WP_URL}/wp-json/watermark/v1/register`,
-  me:       `${WP_URL}/wp-json/wp/v2/users/me`,
   meta:     `${WP_URL}/wp-json/watermark/v1/preset`,
 };
 const REMEMBER_KEY = 'wm_remember';
@@ -909,52 +873,19 @@ const REMEMBER_DAYS = 7;
 // ===== AUTH STATE =====
 const auth = { token: null, user: null, preset: null };
 
-// ===== STATE =====
+// ===== APP STATE =====
 const state = {
   files: [],
   processedBlobs: [],
   wmImage: null,
-  wmImageBase64: null, // ★ 修正3: 儲存 base64
+  wmImageBase64: null,
+  wmImageName: null,
   selectedPos: 'center',
   activeTab: 'text',
   previewIndex: 0,
 };
 
-let previewRaf = 0;
-
-function debouncePreview() {
-  cancelAnimationFrame(previewRaf);
-  previewRaf = requestAnimationFrame(() => updatePreview());
-}
-
-function getResizeConfig(srcW, srcH) {
-  const enabled = document.getElementById('resizeEnabled')?.checked;
-  if (!enabled) return { width: srcW, height: srcH };
-  let width = parseInt(document.getElementById('resizeWidth').value, 10);
-  let height = parseInt(document.getElementById('resizeHeight').value, 10);
-  const lock = document.getElementById('lockAspectRatio')?.checked;
-  if (!width && !height) return { width: srcW, height: srcH };
-  if (lock) {
-    const ratio = srcW / srcH;
-    if (width && !height) height = Math.round(width / ratio);
-    else if (!width && height) width = Math.round(height * ratio);
-  }
-  width = Math.max(1, width || srcW);
-  height = Math.max(1, height || srcH);
-  return { width, height };
-}
-
-function updateCurrentImageInfo(fileObj) {
-  const currentSize = fileObj ? `${fileObj.width} × ${fileObj.height}` : '—';
-  document.getElementById('statCurrentSize').textContent = currentSize;
-  document.getElementById('currentImageSize').textContent = currentSize;
-  document.getElementById('currentFileName').textContent = fileObj ? fileObj.file.name : '—';
-  const out = fileObj ? getResizeConfig(fileObj.width, fileObj.height) : { width: '—', height: '—' };
-  document.getElementById('outputImageSize').textContent = fileObj ? `${out.width} × ${out.height}` : '—';
-  document.getElementById('currentProcessStatus').textContent = fileObj ? (fileObj.processed ? '已完成' : '待處理') : '待處理';
-}
-
-// ===== COOKIE HELPERS =====
+// ===== COOKIE =====
 function setCookie(name, value, days) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
@@ -966,18 +897,6 @@ function getCookie(name) {
 function deleteCookie(name) {
   document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
 }
-
-// ===== CAPTCHA =====
-let captchaAnswer = 0;
-function generateCaptcha() {
-  const a = Math.floor(Math.random() * 15) + 1;
-  const b = Math.floor(Math.random() * 10) + 1;
-  const op = Math.random() > 0.5 ? '+' : '-';
-  captchaAnswer = op === '+' ? a + b : a - b;
-  document.getElementById('captchaQuestion').textContent = `請計算：${a} ${op} ${b} = ?`;
-  document.getElementById('captchaInput').value = '';
-}
-document.getElementById('captchaRefresh').addEventListener('click', generateCaptcha);
 
 // ===== TOAST =====
 function showToast(msg, type = 'success') {
@@ -992,10 +911,22 @@ function showToast(msg, type = 'success') {
   }, 3500);
 }
 
+// ===== CAPTCHA =====
+let captchaAnswer = 0;
+function generateCaptcha() {
+  const a = Math.floor(Math.random() * 15) + 1;
+  const b = Math.floor(Math.random() * 10) + 1;
+  const op = Math.random() > 0.5 ? '+' : '-';
+  captchaAnswer = op === '+' ? a + b : a - b;
+  document.getElementById('captchaQuestion').textContent = `請計算：${a} ${op} ${b} = ?`;
+  document.getElementById('captchaInput').value = '';
+}
+document.getElementById('captchaRefresh').addEventListener('click', generateCaptcha);
+
 // ===== AUTH MODAL =====
 function openAuthModal() {
   document.getElementById('authModal').classList.add('open');
-  document.getElementById('loginUsername').focus();
+  setTimeout(() => document.getElementById('loginUsername').focus(), 50);
 }
 function closeAuthModal() {
   document.getElementById('authModal').classList.remove('open');
@@ -1006,13 +937,12 @@ function switchModalTab(tab) {
   document.getElementById('modalTitle').textContent = tab === 'login' ? '會員登入' : '建立新帳號';
   if (tab === 'register') generateCaptcha();
 }
-
 document.getElementById('btnOpenAuth').addEventListener('click', openAuthModal);
 document.getElementById('modalClose').addEventListener('click', closeAuthModal);
-document.getElementById('authModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeAuthModal(); });
+document.getElementById('authModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAuthModal(); });
 document.querySelectorAll('.modal-tab').forEach(btn => btn.addEventListener('click', () => switchModalTab(btn.dataset.modalTab)));
 
-// ===== CORE LOGIN =====
+// ===== LOGIN =====
 async function doLogin(username, password) {
   const res = await fetch(API.token, {
     method: 'POST',
@@ -1024,7 +954,6 @@ async function doLogin(username, password) {
   return data;
 }
 
-// ===== LOGIN =====
 document.getElementById('btnLogin').addEventListener('click', async () => {
   const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -1032,24 +961,18 @@ document.getElementById('btnLogin').addEventListener('click', async () => {
   const errEl = document.getElementById('loginError');
   errEl.classList.remove('show');
   if (!username || !password) { errEl.textContent = '請填寫帳號與密碼'; errEl.classList.add('show'); return; }
-
   const btn = document.getElementById('btnLogin');
   btn.disabled = true; btn.textContent = '登入中...';
-
   try {
     const data = await doLogin(username, password);
     auth.token = data.token;
-    auth.user = { name: data.user_display_name, email: data.user_email, nicename: data.user_nicename };
-    if (remember) {
-      setCookie(REMEMBER_KEY, JSON.stringify({ username, password }), REMEMBER_DAYS);
-    } else {
-      deleteCookie(REMEMBER_KEY);
-    }
+    auth.user = { name: data.user_display_name, email: data.user_email };
+    if (remember) setCookie(REMEMBER_KEY, JSON.stringify({ username, password }), REMEMBER_DAYS);
+    else deleteCookie(REMEMBER_KEY);
     closeAuthModal();
     onLoginSuccess();
   } catch(e) {
-    errEl.textContent = e.message;
-    errEl.classList.add('show');
+    errEl.textContent = e.message; errEl.classList.add('show');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> 登入';
@@ -1064,19 +987,13 @@ document.getElementById('btnRegister').addEventListener('click', async () => {
   const captchaVal = parseInt(document.getElementById('captchaInput').value, 10);
   const errEl = document.getElementById('registerError');
   errEl.classList.remove('show');
-
   if (!username || !email || !password) { errEl.textContent = '請填寫所有欄位'; errEl.classList.add('show'); return; }
   if (password.length < 8) { errEl.textContent = '密碼至少需要 8 個字元'; errEl.classList.add('show'); return; }
   if (isNaN(captchaVal) || captchaVal !== captchaAnswer) {
-    errEl.textContent = '驗證答案錯誤，請重新計算';
-    errEl.classList.add('show');
-    generateCaptcha();
-    return;
+    errEl.textContent = '驗證答案錯誤'; errEl.classList.add('show'); generateCaptcha(); return;
   }
-
   const btn = document.getElementById('btnRegister');
   btn.disabled = true; btn.textContent = '建立中...';
-
   try {
     const res = await fetch(API.register, {
       method: 'POST',
@@ -1084,25 +1001,22 @@ document.getElementById('btnRegister').addEventListener('click', async () => {
       body: JSON.stringify({ username, email, password })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || '註冊失敗，請換個帳號名稱或信箱');
-
+    if (!res.ok) throw new Error(data.message || '註冊失敗');
     showToast('帳號建立成功！正在自動登入...');
     const loginData = await doLogin(username, password);
     auth.token = loginData.token;
-    auth.user = { name: loginData.user_display_name, email: loginData.user_email, nicename: loginData.user_nicename };
+    auth.user = { name: loginData.user_display_name, email: loginData.user_email };
     closeAuthModal();
     onLoginSuccess();
   } catch(e) {
-    errEl.textContent = e.message;
-    errEl.classList.add('show');
-    generateCaptcha();
+    errEl.textContent = e.message; errEl.classList.add('show'); generateCaptcha();
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> 建立帳號';
   }
 });
 
-// ===== ON LOGIN SUCCESS =====
+// ===== ON LOGIN =====
 function onLoginSuccess() {
   document.getElementById('btnOpenAuth').style.display = 'none';
   document.getElementById('userMenuWrap').style.display = 'flex';
@@ -1123,11 +1037,9 @@ function onLoginSuccess() {
     if (!username || !password) return;
     const data = await doLogin(username, password);
     auth.token = data.token;
-    auth.user = { name: data.user_display_name, email: data.user_email, nicename: data.user_nicename };
+    auth.user = { name: data.user_display_name, email: data.user_email };
     onLoginSuccess();
-  } catch(e) {
-    deleteCookie(REMEMBER_KEY);
-  }
+  } catch(e) { deleteCookie(REMEMBER_KEY); }
 })();
 
 // ===== LOGOUT =====
@@ -1142,8 +1054,8 @@ document.getElementById('btnLogout').addEventListener('click', () => {
   showToast('已登出');
 });
 
-// ===== USER DROPDOWN =====
-document.getElementById('btnUserMenu').addEventListener('click', (e) => {
+// ===== DROPDOWN =====
+document.getElementById('btnUserMenu').addEventListener('click', e => {
   e.stopPropagation();
   document.getElementById('userDropdown').classList.toggle('open');
 });
@@ -1153,55 +1065,61 @@ document.addEventListener('click', () => document.getElementById('userDropdown')
 async function fetchPreset() {
   if (!auth.token) return;
   try {
-    const res = await fetch(API.meta, {
-      headers: { 'Authorization': `Bearer ${auth.token}` }
-    });
+    const res = await fetch(API.meta, { headers: { 'Authorization': `Bearer ${auth.token}` } });
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.preset) {
       auth.preset = data.preset;
       document.getElementById('presetBanner').classList.add('show');
     }
-  } catch(e) { /* silent */ }
+  } catch(e) {}
 }
 
 // ===== PRESET: COLLECT =====
-// ★ 修正3: 文字直接存 JSON（不 encode），圖片浮水印轉 base64 一同儲存
+// ★ 修正3: wmText 直接取 .value，不做任何 encode，JSON.stringify 原生支援 UTF-8
 function collectSettings() {
   return {
-    wmText: document.getElementById('wmText').value,
-    wmFont: document.getElementById('wmFont').value,
-    wmFontSize: document.getElementById('wmFontSize').value,
-    wmColor: document.getElementById('wmColor').value,
-    wmOpacity: document.getElementById('wmOpacity').value,
-    wmRotation: document.getElementById('wmRotation').value,
-    wmImgSize: document.getElementById('wmImgSize').value,
-    wmImgBase64: state.wmImageBase64 || null,
-    wmImgName: state.wmImageName || null,
-    wmTileGap: document.getElementById('wmTileGap').value,
-    wmTile: document.getElementById('wmTile').checked,
-    selectedPos: state.selectedPos,
-    activeTab: state.activeTab,
+    wmText:       document.getElementById('wmText').value,
+    wmFont:       document.getElementById('wmFont').value,
+    wmFontSize:   document.getElementById('wmFontSize').value,
+    wmColor:      document.getElementById('wmColor').value,
+    wmOpacity:    document.getElementById('wmOpacity').value,
+    wmRotation:   document.getElementById('wmRotation').value,
+    wmImgSize:    document.getElementById('wmImgSize').value,
+    wmImgBase64:  state.wmImageBase64 || null,
+    wmImgName:    state.wmImageName || null,
+    wmTileGap:    document.getElementById('wmTileGap').value,
+    wmTile:       document.getElementById('wmTile').checked,
+    selectedPos:  state.selectedPos,
+    activeTab:    state.activeTab,
     outputFormat: document.getElementById('outputFormat').value,
-    outputQuality: document.getElementById('outputQuality').value,
+    outputQuality:document.getElementById('outputQuality').value,
   };
 }
 
 // ===== PRESET: APPLY =====
-// ★ 修正3: 載入文字直接賦值，圖片浮水印從 base64 還原
+// ★ 修正3: 直接把 s.wmText 指定給 input.value，不做 decodeURIComponent 或任何轉換
 function applySettings(s) {
   if (!s) return;
-  if (s.wmText !== undefined) document.getElementById('wmText').value = s.wmText;
-  if (s.wmFont !== undefined) document.getElementById('wmFont').value = s.wmFont;
-  if (s.wmFontSize !== undefined) { document.getElementById('wmFontSize').value = s.wmFontSize; document.getElementById('wmFontSizeVal').textContent = s.wmFontSize + 'px'; }
-  if (s.wmColor !== undefined) document.getElementById('wmColor').value = s.wmColor;
-  if (s.wmOpacity !== undefined) { document.getElementById('wmOpacity').value = s.wmOpacity; document.getElementById('wmOpacityVal').textContent = s.wmOpacity + '%'; }
-  if (s.wmRotation !== undefined) { document.getElementById('wmRotation').value = s.wmRotation; document.getElementById('wmRotationVal').textContent = s.wmRotation + '°'; }
-  if (s.wmImgSize !== undefined) { document.getElementById('wmImgSize').value = s.wmImgSize; document.getElementById('wmImgSizeVal').textContent = s.wmImgSize + '%'; }
-  if (s.wmTileGap !== undefined) { document.getElementById('wmTileGap').value = s.wmTileGap; document.getElementById('wmTileGapVal').textContent = s.wmTileGap + 'px'; }
-  if (s.wmTile !== undefined) { document.getElementById('wmTile').checked = s.wmTile; document.getElementById('tileSection').classList.toggle('visible', s.wmTile); }
-  if (s.outputFormat !== undefined) { document.getElementById('outputFormat').value = s.outputFormat; document.getElementById('statFormat').textContent = s.outputFormat.split('/')[1].toUpperCase(); }
-  if (s.outputQuality !== undefined) { document.getElementById('outputQuality').value = s.outputQuality; document.getElementById('outputQualityVal').textContent = s.outputQuality + '%'; }
+  const set = (id, val) => { if (val !== undefined && val !== null) document.getElementById(id).value = val; };
+  set('wmText',      s.wmText);        // 直接賦值，保留中文
+  set('wmFont',      s.wmFont);
+  set('wmColor',     s.wmColor);
+  set('outputFormat',s.outputFormat);
+
+  if (s.wmFontSize !== undefined)   { set('wmFontSize', s.wmFontSize);   document.getElementById('wmFontSizeVal').textContent   = s.wmFontSize + 'px'; }
+  if (s.wmOpacity !== undefined)    { set('wmOpacity',  s.wmOpacity);    document.getElementById('wmOpacityVal').textContent    = s.wmOpacity + '%'; }
+  if (s.wmRotation !== undefined)   { set('wmRotation', s.wmRotation);   document.getElementById('wmRotationVal').textContent   = s.wmRotation + '°'; }
+  if (s.wmImgSize !== undefined)    { set('wmImgSize',  s.wmImgSize);    document.getElementById('wmImgSizeVal').textContent    = s.wmImgSize + '%'; }
+  if (s.wmTileGap !== undefined)    { set('wmTileGap',  s.wmTileGap);    document.getElementById('wmTileGapVal').textContent    = s.wmTileGap + 'px'; }
+  if (s.outputQuality !== undefined){ set('outputQuality', s.outputQuality); document.getElementById('outputQualityVal').textContent = s.outputQuality + '%'; }
+  if (s.wmTile !== undefined) {
+    document.getElementById('wmTile').checked = s.wmTile;
+    document.getElementById('tileSection').classList.toggle('visible', s.wmTile);
+  }
+  if (s.outputFormat) {
+    document.getElementById('statFormat').textContent = s.outputFormat.split('/')[1].toUpperCase();
+  }
   if (s.selectedPos) {
     state.selectedPos = s.selectedPos;
     document.querySelectorAll('.pos-btn').forEach(b => b.classList.toggle('active', b.dataset.pos === s.selectedPos));
@@ -1212,14 +1130,14 @@ function applySettings(s) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + s.activeTab));
     document.getElementById('statWmType').textContent = s.activeTab === 'text' ? '文字' : '圖片';
   }
-  // ★ 還原圖片浮水印 base64
+  // 還原圖片浮水印
   if (s.wmImgBase64) {
     const img = new Image();
     img.onload = () => {
       state.wmImage = img;
       state.wmImageBase64 = s.wmImgBase64;
       state.wmImageName = s.wmImgName || '已儲存圖片';
-      document.getElementById('wmImgLabel').textContent = '✓ ' + (s.wmImgName || '已儲存圖片');
+      document.getElementById('wmImgLabel').textContent = '✓ ' + state.wmImageName;
       updatePreview();
     };
     img.src = s.wmImgBase64;
@@ -1231,19 +1149,16 @@ function applySettings(s) {
 // ===== PRESET: SAVE =====
 async function savePreset() {
   if (!auth.token) { showToast('請先登入', 'error'); openAuthModal(); return; }
-  const settings = collectSettings();
   try {
     const res = await fetch(API.meta, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` },
-      body: JSON.stringify({ preset: settings })
+      body: JSON.stringify({ preset: collectSettings() })
     });
     if (!res.ok) throw new Error('儲存失敗');
-    auth.preset = settings;
+    auth.preset = collectSettings();
     showToast('浮水印設定已儲存！');
-  } catch(e) {
-    showToast('儲存失敗：' + e.message, 'error');
-  }
+  } catch(e) { showToast('儲存失敗：' + e.message, 'error'); }
 }
 
 document.getElementById('btnSavePreset').addEventListener('click', () => { document.getElementById('userDropdown').classList.remove('open'); savePreset(); });
@@ -1251,7 +1166,7 @@ document.getElementById('btnSavePresetInline').addEventListener('click', savePre
 document.getElementById('btnLoadPreset').addEventListener('click', () => {
   document.getElementById('userDropdown').classList.remove('open');
   if (auth.preset) { applySettings(auth.preset); showToast('已載入儲存的設定！'); }
-  else { showToast('尚無儲存的設定', 'error'); }
+  else showToast('尚無儲存的設定', 'error');
 });
 document.getElementById('btnApplyPreset').addEventListener('click', () => {
   applySettings(auth.preset);
@@ -1266,14 +1181,14 @@ document.getElementById('btnDismissPreset').addEventListener('click', () => {
 function bindRange(id, valId, suffix) {
   const el = document.getElementById(id);
   const val = document.getElementById(valId);
-  el.addEventListener('input', () => { val.textContent = el.value + suffix; updatePreview(); });
+  el.addEventListener('input', () => { val.textContent = el.value + suffix; debouncePreview(); });
 }
-bindRange('wmFontSize', 'wmFontSizeVal', 'px');
-bindRange('wmOpacity', 'wmOpacityVal', '%');
-bindRange('wmRotation', 'wmRotationVal', '°');
-bindRange('wmImgSize', 'wmImgSizeVal', '%');
-bindRange('wmTileGap', 'wmTileGapVal', 'px');
-bindRange('outputQuality', 'outputQualityVal', '%');
+bindRange('wmFontSize',    'wmFontSizeVal',   'px');
+bindRange('wmOpacity',     'wmOpacityVal',    '%');
+bindRange('wmRotation',    'wmRotationVal',   '°');
+bindRange('wmImgSize',     'wmImgSizeVal',    '%');
+bindRange('wmTileGap',     'wmTileGapVal',    'px');
+bindRange('outputQuality', 'outputQualityVal','%');
 
 // ===== TABS =====
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1284,7 +1199,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     state.activeTab = btn.dataset.tab;
     document.getElementById('statWmType').textContent = btn.dataset.tab === 'text' ? '文字' : '圖片';
-    updatePreview();
+    debouncePreview();
   });
 });
 
@@ -1294,20 +1209,20 @@ document.querySelectorAll('.pos-btn').forEach(btn => {
     document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     state.selectedPos = btn.dataset.pos;
-    updatePreview();
+    debouncePreview();
   });
 });
 
 // ===== TILE TOGGLE =====
 document.getElementById('wmTile').addEventListener('change', function() {
   document.getElementById('tileSection').classList.toggle('visible', this.checked);
-  updatePreview();
+  debouncePreview();
 });
 
-// ===== TEXT/COLOR UPDATES =====
-['wmText','wmFont','wmColor','outputFormat'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updatePreview);
-  document.getElementById(id).addEventListener('change', updatePreview);
+// ===== LIVE UPDATES =====
+['wmText', 'wmFont', 'wmColor'].forEach(id => {
+  document.getElementById(id).addEventListener('input', debouncePreview);
+  document.getElementById(id).addEventListener('change', debouncePreview);
 });
 document.getElementById('outputFormat').addEventListener('change', function() {
   document.getElementById('statFormat').textContent = this.value.split('/')[1].toUpperCase();
@@ -1316,41 +1231,85 @@ document.getElementById('outputFormat').addEventListener('change', function() {
   qg.style.pointerEvents = this.value === 'image/png' ? 'none' : '';
 });
 
+// ===== RESIZE LOCK =====
+document.getElementById('resizeWidth').addEventListener('input', e => {
+  const current = state.files[state.previewIndex];
+  if (!current || !document.getElementById('lockAspectRatio').checked) return;
+  const w = parseInt(e.target.value, 10);
+  if (!w) return;
+  document.getElementById('resizeHeight').value = Math.round(w * current.height / current.width);
+  debouncePreview();
+});
+document.getElementById('resizeHeight').addEventListener('input', e => {
+  const current = state.files[state.previewIndex];
+  if (!current || !document.getElementById('lockAspectRatio').checked) return;
+  const h = parseInt(e.target.value, 10);
+  if (!h) return;
+  document.getElementById('resizeWidth').value = Math.round(h * current.width / current.height);
+  debouncePreview();
+});
+['resizeEnabled','lockAspectRatio'].forEach(id => {
+  document.getElementById(id).addEventListener('change', debouncePreview);
+});
+
 // ===== FILE UPLOAD =====
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 
 dropZone.addEventListener('click', () => fileInput.click());
-dropZone.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
 dropZone.addEventListener('drop', e => {
   e.preventDefault(); dropZone.classList.remove('dragover');
   handleFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
 });
-fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
 
-function handleFiles(newFiles) {
+// ★ 修正4: 非同步逐一載入，不卡 UI
+fileInput.addEventListener('change', () => {
+  handleFiles(Array.from(fileInput.files));
+  fileInput.value = ''; // 允許重複選同一檔案
+});
+
+// ★ 修正4: 用 createImageBitmap + 縮圖 DataURL 分批非同步，不凍結 UI
+async function handleFiles(newFiles) {
   if (!newFiles.length) return;
-  newFiles.forEach(f => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.decoding = 'async';
-      img.onload = () => {
-        state.files.push({ file: f, url: e.target.result, img, width: img.naturalWidth || img.width, height: img.naturalHeight || img.height, processed: false });
-        renderGrid();
-        updateStats();
-        if (state.files.length === 1) { state.previewIndex = 0; updatePreview(); }
+  for (const f of newFiles) {
+    await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        try {
+          // 建立縮圖用 bitmap（不凍結主執行緒）
+          const blob = f;
+          const bmp = await createImageBitmap(blob);
+          const w = bmp.width, h = bmp.height;
+
+          // 建立縮圖 dataURL（限 320px 以節省記憶體）
+          const thumbSize = 320;
+          const thumbW = w > h ? thumbSize : Math.round(thumbSize * w / h);
+          const thumbH = w > h ? Math.round(thumbSize * h / w) : thumbSize;
+          const tc = document.createElement('canvas');
+          tc.width = thumbW; tc.height = thumbH;
+          tc.getContext('2d').drawImage(bmp, 0, 0, thumbW, thumbH);
+          const thumbUrl = tc.toDataURL('image/jpeg', 0.7);
+
+          state.files.push({ file: f, url: thumbUrl, bmp, width: w, height: h, processed: false });
+          renderGrid();
+          updateStats();
+          if (state.files.length === 1) { state.previewIndex = 0; updatePreview(); }
+        } catch(err) {
+          showToast('無法載入圖片：' + f.name, 'error');
+        }
+        resolve();
       };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(f);
-  });
+      reader.readAsArrayBuffer(f);
+    });
+    // 讓瀏覽器有機會更新 UI
+    await new Promise(r => setTimeout(r, 0));
+  }
 }
 
-// ===== WATERMARK IMAGE UPLOAD =====
-// ★ 修正3: 儲存 base64 到 state.wmImageBase64
+// ===== WATERMARK IMAGE =====
 document.getElementById('wmFileInput').addEventListener('change', function() {
   if (!this.files[0]) return;
   const file = this.files[0];
@@ -1380,7 +1339,7 @@ function renderGrid() {
     div.className = 'image-thumb';
     div.innerHTML = `
       <img src="${f.url}" alt="${f.file.name}" loading="lazy" width="160" height="160">
-      <button class="remove-btn" aria-label="移除圖片" data-i="${i}">✕</button>
+      <button class="remove-btn" data-i="${i}">✕</button>
       ${f.processed ? '<span class="status-badge done">完成</span>' : ''}
     `;
     div.querySelector('img').addEventListener('click', () => { state.previewIndex = i; updatePreview(); });
@@ -1393,13 +1352,29 @@ function renderGrid() {
     });
     grid.appendChild(div);
   });
-  document.getElementById('btnProcess').disabled = state.files.length === 0;
+  document.getElementById('btnProcess').disabled = false;
+}
+
+// ===== RESIZE CONFIG =====
+function getResizeConfig(srcW, srcH) {
+  const enabled = document.getElementById('resizeEnabled').checked;
+  if (!enabled) return { width: srcW, height: srcH };
+  let width = parseInt(document.getElementById('resizeWidth').value, 10);
+  let height = parseInt(document.getElementById('resizeHeight').value, 10);
+  const lock = document.getElementById('lockAspectRatio').checked;
+  if (!width && !height) return { width: srcW, height: srcH };
+  if (lock) {
+    const ratio = srcW / srcH;
+    if (width && !height) height = Math.round(width / ratio);
+    else if (!width && height) width = Math.round(height * ratio);
+  }
+  return { width: Math.max(1, width || srcW), height: Math.max(1, height || srcH) };
 }
 
 // ===== WATERMARK ENGINE =====
-function applyWatermark(img) {
-  const srcW = img.naturalWidth || img.width;
-  const srcH = img.naturalHeight || img.height;
+// ★ 修正4: applyWatermark 使用 bmp（ImageBitmap）直接繪製，速度更快
+function applyWatermark(fileObj) {
+  const srcW = fileObj.width, srcH = fileObj.height;
   const target = getResizeConfig(srcW, srcH);
   const canvas = document.createElement('canvas');
   canvas.width = target.width;
@@ -1407,29 +1382,33 @@ function applyWatermark(img) {
   const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: false });
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  // 使用 ImageBitmap 或 img element 繪製
+  if (fileObj.bmp) ctx.drawImage(fileObj.bmp, 0, 0, canvas.width, canvas.height);
+  else if (fileObj.img) ctx.drawImage(fileObj.img, 0, 0, canvas.width, canvas.height);
 
   const opacity = parseFloat(document.getElementById('wmOpacity').value) / 100;
   const rotation = parseFloat(document.getElementById('wmRotation').value) * Math.PI / 180;
   const isTile = document.getElementById('wmTile').checked;
-
   ctx.globalAlpha = opacity;
 
-  if (isTile) {
-    drawTile(ctx, canvas.width, canvas.height, rotation);
-  } else {
-    drawSingle(ctx, canvas.width, canvas.height, rotation);
-  }
+  if (isTile) drawTile(ctx, canvas.width, canvas.height, rotation);
+  else drawSingle(ctx, canvas.width, canvas.height, rotation);
 
   return canvas;
 }
 
-function getWmSize(canvasW) {
-  if (state.activeTab === 'image') {
-    const pct = parseFloat(document.getElementById('wmImgSize').value) / 100;
-    return Math.round(canvasW * pct);
+function getWmMetrics(ctx) {
+  if (state.activeTab === 'text') {
+    const fontSize = parseFloat(document.getElementById('wmFontSize').value);
+    const font = document.getElementById('wmFont').value;
+    ctx.font = `${fontSize}px ${font}`;
+    const m = ctx.measureText(document.getElementById('wmText').value || '浮水印');
+    return { w: m.width, h: fontSize };
   }
-  return parseFloat(document.getElementById('wmFontSize').value);
+  if (!state.wmImage) return { w: 100, h: 100 };
+  const w = Math.round(ctx.canvas.width * parseFloat(document.getElementById('wmImgSize').value) / 100);
+  return { w, h: w / (state.wmImage.width / state.wmImage.height) };
 }
 
 function drawWmElement(ctx, x, y, rotation) {
@@ -1439,113 +1418,78 @@ function drawWmElement(ctx, x, y, rotation) {
   if (state.activeTab === 'text') {
     const fontSize = parseFloat(document.getElementById('wmFontSize').value);
     const font = document.getElementById('wmFont').value;
-    const color = document.getElementById('wmColor').value;
     ctx.font = `${fontSize}px ${font}`;
-    ctx.fillStyle = color;
+    ctx.fillStyle = document.getElementById('wmColor').value;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(document.getElementById('wmText').value || '浮水印', 0, 0);
   } else {
     if (!state.wmImage) { ctx.restore(); return; }
-    const w = getWmSize(ctx.canvas.width);
-    const ratio = state.wmImage.width / state.wmImage.height;
-    const h = w / ratio;
-    ctx.drawImage(state.wmImage, -w/2, -h/2, w, h);
+    const { w, h } = getWmMetrics(ctx);
+    ctx.drawImage(state.wmImage, -w / 2, -h / 2, w, h);
   }
   ctx.restore();
 }
 
-function getTextMetrics(ctx) {
-  if (state.activeTab === 'text') {
-    const fontSize = parseFloat(document.getElementById('wmFontSize').value);
-    const font = document.getElementById('wmFont').value;
-    ctx.font = `${fontSize}px ${font}`;
-    const m = ctx.measureText(document.getElementById('wmText').value || '浮水印');
-    return { w: m.width, h: fontSize };
-  } else {
-    if (!state.wmImage) return { w: 100, h: 100 };
-    const w = getWmSize(ctx.canvas.width);
-    return { w, h: w / (state.wmImage.width / state.wmImage.height) };
-  }
-}
-
 function drawSingle(ctx, cw, ch, rotation) {
-  const pos = state.selectedPos;
-  const { w, h } = getTextMetrics(ctx);
+  const { w, h } = getWmMetrics(ctx);
   const pad = Math.max(w, h) * 0.6 + 20;
+  const pos = state.selectedPos;
   let x = cw / 2, y = ch / 2;
-  if (pos.includes('left')) x = pad;
-  if (pos.includes('right')) x = cw - pad;
-  if (pos.includes('top')) y = pad;
+  if (pos.includes('left'))   x = pad;
+  if (pos.includes('right'))  x = cw - pad;
+  if (pos.includes('top'))    y = pad;
   if (pos.includes('bottom')) y = ch - pad;
   drawWmElement(ctx, x, y, rotation);
 }
 
 function drawTile(ctx, cw, ch, rotation) {
   const gap = parseFloat(document.getElementById('wmTileGap').value);
-  const { w, h } = getTextMetrics(ctx);
-  const stepX = w + gap;
-  const stepY = h + gap;
-  for (let y = -ch; y < ch * 2; y += stepY) {
-    for (let x = -cw; x < cw * 2; x += stepX) {
+  const { w, h } = getWmMetrics(ctx);
+  const stepX = w + gap, stepY = h + gap;
+  for (let y = -ch; y < ch * 2; y += stepY)
+    for (let x = -cw; x < cw * 2; x += stepX)
       drawWmElement(ctx, x, y, rotation);
-    }
-  }
 }
 
 // ===== PREVIEW =====
+let previewRaf = 0;
+function debouncePreview() {
+  cancelAnimationFrame(previewRaf);
+  previewRaf = requestAnimationFrame(updatePreview);
+}
+
+function updateCurrentImageInfo(fileObj) {
+  const sz = fileObj ? `${fileObj.width} × ${fileObj.height}` : '—';
+  document.getElementById('statCurrentSize').textContent = sz;
+  document.getElementById('currentImageSize').textContent = sz;
+  document.getElementById('currentFileName').textContent = fileObj ? fileObj.file.name : '—';
+  const out = fileObj ? getResizeConfig(fileObj.width, fileObj.height) : null;
+  document.getElementById('outputImageSize').textContent = out ? `${out.width} × ${out.height}` : '—';
+  document.getElementById('currentProcessStatus').textContent = fileObj ? (fileObj.processed ? '已完成' : '待處理') : '待處理';
+}
+
 function updatePreview() {
   const canvas = document.getElementById('previewCanvas');
-  const empty = document.getElementById('previewEmpty');
-  const loading = document.getElementById('previewLoading');
+  const empty  = document.getElementById('previewEmpty');
+  const loading= document.getElementById('previewLoading');
   if (!state.files.length) {
-    canvas.style.display = 'none';
-    loading.style.display = 'none';
-    empty.style.display = 'flex';
-    updateCurrentImageInfo(null);
-    return;
+    canvas.style.display = 'none'; loading.style.display = 'none'; empty.style.display = 'flex';
+    updateCurrentImageInfo(null); return;
   }
   const src = state.files[state.previewIndex];
   if (!src) return;
-  empty.style.display = 'none';
-  loading.style.display = 'flex';
-  canvas.style.display = 'none';
+  empty.style.display = 'none'; loading.style.display = 'flex'; canvas.style.display = 'none';
   updateCurrentImageInfo(src);
   requestAnimationFrame(() => {
-    const result = applyWatermark(src.img);
-    const ctx = canvas.getContext('2d');
-    canvas.width = result.width;
-    canvas.height = result.height;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(result, 0, 0);
-    loading.style.display = 'none';
-    canvas.style.display = 'block';
+    const result = applyWatermark(src);
+    canvas.width = result.width; canvas.height = result.height;
+    canvas.getContext('2d').drawImage(result, 0, 0);
+    loading.style.display = 'none'; canvas.style.display = 'block';
   });
 }
 
 document.getElementById('refreshPreview').addEventListener('click', updatePreview);
-['resizeEnabled','resizeWidth','resizeHeight','lockAspectRatio'].forEach(id => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('input', () => debouncePreview());
-  el.addEventListener('change', () => debouncePreview());
-});
-document.getElementById('resizeWidth')?.addEventListener('input', e => {
-  const current = state.files[state.previewIndex];
-  if (!current || !document.getElementById('lockAspectRatio').checked) return;
-  const w = parseInt(e.target.value, 10);
-  if (!w) return;
-  document.getElementById('resizeHeight').value = Math.round(w * current.height / current.width);
-  debouncePreview();
-});
-document.getElementById('resizeHeight')?.addEventListener('input', e => {
-  const current = state.files[state.previewIndex];
-  if (!current || !document.getElementById('lockAspectRatio').checked) return;
-  const h = parseInt(e.target.value, 10);
-  if (!h) return;
-  document.getElementById('resizeWidth').value = Math.round(h * current.width / current.height);
-  debouncePreview();
-});
 
 // ===== STATS =====
 function updateStats() {
@@ -1562,21 +1506,17 @@ document.getElementById('btnProcess').addEventListener('click', async () => {
   const progressWrap = document.getElementById('progressWrap');
   const progressFill = document.getElementById('progressFill');
   const progressText = document.getElementById('progressText');
-
-  btn.disabled = true;
-  progressWrap.style.display = 'block';
-  state.processedBlobs = [];
+  btn.disabled = true; progressWrap.style.display = 'block'; state.processedBlobs = [];
 
   for (let i = 0; i < state.files.length; i++) {
     const f = state.files[i];
-    const result = applyWatermark(f.img);
+    const result = applyWatermark(f);
     const fmt = document.getElementById('outputFormat').value;
     const quality = parseFloat(document.getElementById('outputQuality').value) / 100;
     await new Promise(resolve => {
       result.toBlob(blob => {
         state.processedBlobs[i] = { blob, name: f.file.name };
-        f.processed = true;
-        resolve();
+        f.processed = true; resolve();
       }, fmt, fmt === 'image/png' ? undefined : quality);
     });
     const pct = Math.round(((i + 1) / state.files.length) * 100);
@@ -1585,15 +1525,14 @@ document.getElementById('btnProcess').addEventListener('click', async () => {
     await new Promise(requestAnimationFrame);
   }
 
-  renderGrid();
-  updateStats();
+  renderGrid(); updateStats();
   progressText.textContent = `全部完成！共 ${state.files.length} 張`;
   btn.disabled = false;
   document.getElementById('btnDownloadAll').disabled = false;
   showToast(`已處理完成 ${state.files.length} 張圖片！`);
 });
 
-// ===== DOWNLOAD ALL (ZIP) =====
+// ===== DOWNLOAD ZIP =====
 document.getElementById('btnDownloadAll').addEventListener('click', async () => {
   if (!state.processedBlobs.length) return;
   const btn = document.getElementById('btnDownloadAll');
@@ -1605,8 +1544,7 @@ document.getElementById('btnDownloadAll').addEventListener('click', async () => 
     const ext = fmt.split('/')[1];
     state.processedBlobs.forEach(({ blob, name }) => {
       if (!blob) return;
-      const baseName = name.replace(/\.[^.]+$/, '');
-      zip.file(`${baseName}_wm.${ext}`, blob);
+      zip.file(`${name.replace(/\.[^.]+$/, '')}_wm.${ext}`, blob);
     });
     const content = await zip.generateAsync({ type: 'blob' });
     const a = document.createElement('a');
@@ -1615,9 +1553,8 @@ document.getElementById('btnDownloadAll').addEventListener('click', async () => 
     a.click();
     URL.revokeObjectURL(a.href);
     showToast('ZIP 下載完成！');
-  } catch(e) {
-    showToast('下載失敗：' + e.message, 'error');
-  } finally {
+  } catch(e) { showToast('下載失敗：' + e.message, 'error'); }
+  finally {
     btn.disabled = false;
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 下載全部（ZIP）';
   }
@@ -1625,6 +1562,8 @@ document.getElementById('btnDownloadAll').addEventListener('click', async () => 
 
 // ===== CLEAR =====
 document.getElementById('btnClear').addEventListener('click', () => {
+  // 釋放 ImageBitmap 記憶體
+  state.files.forEach(f => { if (f.bmp && f.bmp.close) f.bmp.close(); });
   state.files = []; state.processedBlobs = [];
   renderGrid(); updateStats(); updatePreview();
   document.getElementById('btnDownloadAll').disabled = true;
