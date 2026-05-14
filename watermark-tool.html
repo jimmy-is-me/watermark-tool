@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW" data-theme="light">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
 <style>
-/* ===== DESIGN TOKENS ===== */
-:root, [data-theme="light"] {
+/* ===== DESIGN TOKENS (Light Only) ===== */
+:root {
   --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
   --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
   --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
@@ -46,29 +46,6 @@
   --font-body: 'Inter', system-ui, sans-serif;
   --content-default: 1100px;
 }
-[data-theme="dark"] {
-  --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
-  --color-surface-offset: #1d1c1a; --color-surface-dynamic: #2d2c2a;
-  --color-divider: #262523; --color-border: #393836;
-  --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
-  --color-primary: #4f98a3; --color-primary-hover: #227f8b;
-  --color-primary-highlight: #313b3b;
-  --color-error: #d163a7; --color-success: #6daa45;
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2);
-  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
-  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.4);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
-    --color-surface-offset: #1d1c1a; --color-surface-dynamic: #2d2c2a;
-    --color-divider: #262523; --color-border: #393836;
-    --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
-    --color-primary: #4f98a3; --color-primary-hover: #227f8b;
-    --color-primary-highlight: #313b3b;
-    --color-error: #d163a7; --color-success: #6daa45;
-  }
-}
 
 /* ===== BASE ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -89,32 +66,25 @@ button { cursor: pointer; background: none; border: none; }
 /* ===== LAYOUT ===== */
 .app-wrapper { display: flex; flex-direction: column; min-height: 100dvh; }
 
+/* ★ 修正1: header overflow visible，讓 dropdown 不被裁切 */
 header {
   position: sticky; top: 0; z-index: 100;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
+  overflow: visible;
 }
 .header-inner {
   max-width: var(--content-default); margin: 0 auto;
   padding: var(--space-3) var(--space-6);
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+  overflow: visible;
 }
 .logo { display: flex; align-items: center; gap: var(--space-3); text-decoration: none; color: var(--color-text); }
 .logo-img { height: 36px; width: auto; display: block; object-fit: contain; }
-.logo-divider {
-  width: 1px; height: 22px;
-  background: var(--color-border);
-  flex-shrink: 0;
-}
+.logo-divider { width: 1px; height: 22px; background: var(--color-border); flex-shrink: 0; }
 .logo-text { font-size: var(--text-sm); font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
-.header-actions { display: flex; align-items: center; gap: var(--space-2); }
-.theme-toggle {
-  width: 36px; height: 36px; border-radius: var(--radius-full);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--color-text-muted); transition: background var(--transition-interactive), color var(--transition-interactive);
-}
-.theme-toggle:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.header-actions { display: flex; align-items: center; gap: var(--space-2); overflow: visible; }
 
 /* ===== AUTH BUTTON ===== */
 .auth-btn {
@@ -178,8 +148,8 @@ input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-b
   transition: background var(--transition-interactive), color var(--transition-interactive), box-shadow var(--transition-interactive);
   cursor: pointer; border: none; text-decoration: none; white-space: nowrap;
 }
-.btn-primary { background: var(--color-primary); color: #fff; }
-.btn-primary:hover { background: var(--color-primary-hover); box-shadow: var(--shadow-md); }
+.btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; }
+.btn-primary:hover { background: linear-gradient(135deg, #1d4ed8, #1e40af); box-shadow: var(--shadow-md); }
 .btn-secondary { background: var(--color-surface-offset); color: var(--color-text); border: 1px solid var(--color-border); }
 .btn-secondary:hover { background: var(--color-surface-dynamic); }
 .btn-ghost { color: var(--color-text-muted); }
@@ -199,7 +169,7 @@ input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-b
   display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
 }
 .upload-zone:hover, .upload-zone.dragover {
-  border-color: var(--color-primary); background: oklch(from var(--color-primary) l c h / 0.04);
+  border-color: var(--color-primary); background: rgba(37,99,235,0.04);
 }
 .upload-zone .upload-icon { color: var(--color-primary); margin-bottom: var(--space-2); }
 .upload-zone h3 { font-size: var(--text-base); font-weight: 600; }
@@ -222,13 +192,13 @@ input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-b
 .image-thumb .remove-btn {
   position: absolute; top: var(--space-1); right: var(--space-1);
   width: 24px; height: 24px; border-radius: var(--radius-full);
-  background: oklch(0 0 0 / 0.55); color: #fff;
+  background: rgba(0,0,0,0.55); color: #fff;
   display: flex; align-items: center; justify-content: center;
   opacity: 0; transition: opacity var(--transition-interactive);
   font-size: 11px; font-weight: 600;
 }
 .image-thumb:hover .remove-btn { opacity: 1; }
-.image-thumb .remove-btn:hover { background: oklch(0.45 0.2 10 / 0.9); }
+.image-thumb .remove-btn:hover { background: rgba(180,30,30,0.9); }
 .status-badge {
   position: absolute; bottom: var(--space-1); left: var(--space-1);
   padding: 2px var(--space-2); border-radius: var(--radius-full);
@@ -245,7 +215,7 @@ input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-b
 }
 #previewCanvas { max-width: 100%; max-height: 420px; object-fit: contain; border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
 
-/* ===== WATERMARK OPTIONS TABS ===== */
+/* ===== TABS ===== */
 .tab-bar { display: flex; gap: var(--space-1); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-5); }
 .tab-btn {
   padding: var(--space-2) var(--space-4); font-size: var(--text-sm); font-weight: 500;
@@ -287,7 +257,7 @@ input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-b
   cursor: pointer; transition: background var(--transition-interactive), border-color var(--transition-interactive);
   display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--color-text-faint);
 }
-.pos-btn.active { background: var(--color-primary); border-color: var(--color-primary); }
+.pos-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
 .pos-btn:hover:not(.active) { background: var(--color-primary-highlight); border-color: var(--color-primary); }
 
 /* ===== EMPTY STATE ===== */
@@ -322,9 +292,10 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 .tile-section.visible { display: block; }
 
 /* ===== AUTH MODAL ===== */
+/* ★ 修正2: z-index 9999，確保彈出在最上層 */
 .modal-overlay {
-  position: fixed; inset: 0; z-index: 1000;
-  background: oklch(0.1 0 0 / 0.55);
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(10,10,10,0.55);
   display: flex; align-items: center; justify-content: center;
   padding: var(--space-4);
   opacity: 0; pointer-events: none;
@@ -332,11 +303,12 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 }
 .modal-overlay.open { opacity: 1; pointer-events: all; }
 .modal {
-  background: var(--color-surface); border: 1px solid var(--color-border);
+  background: #fff; border: 1px solid var(--color-border);
   border-radius: var(--radius-xl); padding: var(--space-8);
   width: 100%; max-width: 420px; box-shadow: var(--shadow-lg);
   transform: translateY(12px);
   transition: transform 0.2s ease;
+  position: relative; z-index: 10000;
 }
 .modal-overlay.open .modal { transform: translateY(0); }
 .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
@@ -361,7 +333,7 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 .modal-footer { margin-top: var(--space-4); text-align: center; font-size: var(--text-xs); color: var(--color-text-muted); }
 .modal-footer a { color: var(--color-primary); cursor: pointer; text-decoration: none; }
 .modal-footer a:hover { text-decoration: underline; }
-.auth-error { font-size: var(--text-xs); color: var(--color-error); margin-top: var(--space-2); display: none; padding: var(--space-2) var(--space-3); background: oklch(from var(--color-error) l c h / 0.08); border-radius: var(--radius-md); }
+.auth-error { font-size: var(--text-xs); color: var(--color-error); margin-top: var(--space-2); display: none; padding: var(--space-2) var(--space-3); background: rgba(161,44,123,0.08); border-radius: var(--radius-md); }
 .auth-error.show { display: block; }
 
 /* ===== CAPTCHA ===== */
@@ -406,7 +378,7 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
   display: none; align-items: center; gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   background: var(--color-primary-highlight);
-  border: 1px solid oklch(from var(--color-primary) l c h / 0.25);
+  border: 1px solid rgba(37,99,235,0.25);
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-4);
   font-size: var(--text-sm);
@@ -417,13 +389,14 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 .preset-banner-actions { display: flex; gap: var(--space-2); }
 
 /* ===== USER DROPDOWN ===== */
+/* ★ 修正1: z-index 9000 > header z-index 100 */
 .user-menu-wrap { position: relative; }
 .user-dropdown {
-  position: absolute; top: calc(100% + var(--space-2)); right: 0;
-  background: var(--color-surface); border: 1px solid var(--color-border);
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: #fff; border: 1px solid var(--color-border);
   border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
-  min-width: 200px; padding: var(--space-2);
-  display: none; z-index: 500;
+  min-width: 210px; padding: var(--space-2);
+  display: none; z-index: 9000;
 }
 .user-dropdown.open { display: block; }
 .dropdown-item {
@@ -435,7 +408,7 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
 }
 .dropdown-item:hover { background: var(--color-surface-offset); }
 .dropdown-item.danger { color: var(--color-error); }
-.dropdown-item.danger:hover { background: oklch(from var(--color-error) l c h / 0.08); }
+.dropdown-item.danger:hover { background: rgba(161,44,123,0.08); }
 .dropdown-divider { height: 1px; background: var(--color-divider); margin: var(--space-1) 0; }
 .dropdown-user-info { padding: var(--space-2) var(--space-3) var(--space-1); }
 .dropdown-username { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); }
@@ -478,59 +451,27 @@ body::before {
   background: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(241,245,249,0.95));
 }
 .logo-img { filter: drop-shadow(0 6px 18px rgba(37,99,235,.14)); }
-.btn-primary {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-}
-.btn-primary:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
-}
-.loading-pulse {
-  animation: breathingGlow 1.6s ease-in-out infinite;
-}
+.loading-pulse { animation: breathingGlow 1.6s ease-in-out infinite; }
 .image-meta {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  padding: 6px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  color: #fff;
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  padding: 6px 8px; border-radius: 10px; font-size: 11px; color: #fff;
   background: linear-gradient(180deg, rgba(15,23,42,.12), rgba(15,23,42,.72));
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  align-items: center;
+  display: flex; justify-content: space-between; gap: 8px; align-items: center;
 }
 .photo-info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-  margin-top: var(--space-4);
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3); margin-top: var(--space-4);
 }
 .info-chip {
-  padding: 10px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: rgba(255,255,255,0.72);
+  padding: 10px 12px; border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); background: rgba(255,255,255,0.72);
 }
-.info-chip-label {
-  display: block;
-  font-size: 11px;
-  color: var(--color-text-muted);
-  margin-bottom: 4px;
-}
-.info-chip-value {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text);
-  word-break: break-word;
-}
+.info-chip-label { display: block; font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px; }
+.info-chip-value { font-size: 14px; font-weight: 700; color: var(--color-text); word-break: break-word; }
 @keyframes breathingGlow {
   0%, 100% { opacity: .58; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.04); }
 }
-
 </style>
 </head>
 <body>
@@ -581,12 +522,7 @@ body::before {
           </button>
         </div>
       </div>
-
-      <button class="theme-toggle" data-theme-toggle aria-label="切換暗色模式">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-        </svg>
-      </button>
+      <!-- ★ 修正2: 移除 theme-toggle 按鈕，僅保留亮色模式 -->
     </div>
   </div>
 </header>
@@ -635,7 +571,6 @@ body::before {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           上傳圖片
         </div>
-
         <div class="upload-zone" id="dropZone" role="button" tabindex="0" aria-label="點擊或拖放上傳圖片">
           <div class="upload-icon">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -647,7 +582,6 @@ body::before {
           <button class="btn btn-secondary btn-sm" style="margin-top: var(--space-1);" onclick="document.getElementById('fileInput').click();event.stopPropagation()">選擇檔案</button>
         </div>
         <input type="file" id="fileInput" multiple accept="image/*">
-
         <div id="imageGrid" class="image-grid" style="display:none;"></div>
         <div id="emptyGrid"></div>
       </div>
@@ -874,7 +808,6 @@ body::before {
           <button class="btn btn-ghost btn-sm" id="btnClear">清除全部</button>
         </div>
 
-        <!-- PROGRESS -->
         <div class="progress-wrap" id="progressWrap" style="display:none">
           <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
           <div class="progress-text" id="progressText">處理中...</div>
@@ -899,7 +832,6 @@ body::before {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-
     <div class="modal-tabs">
       <button class="modal-tab active" data-modal-tab="login">登入</button>
       <button class="modal-tab" data-modal-tab="register">註冊新帳號</button>
@@ -915,7 +847,6 @@ body::before {
         <label for="loginPassword">密碼</label>
         <input type="password" id="loginPassword" placeholder="輸入密碼" autocomplete="current-password">
       </div>
-      <!-- 記住我 -->
       <div class="remember-row">
         <input type="checkbox" id="rememberMe">
         <label for="rememberMe">記住我（7 天內自動登入）</label>
@@ -944,7 +875,6 @@ body::before {
         <label for="regPassword">密碼</label>
         <input type="password" id="regPassword" placeholder="至少 8 個字元" autocomplete="new-password">
       </div>
-      <!-- 數字驗證 -->
       <div class="captcha-wrap" id="captchaWrap">
         <span class="captcha-question" id="captchaQuestion">載入中...</span>
         <input type="number" class="captcha-input" id="captchaInput" placeholder="答案" min="0" max="99" autocomplete="off">
@@ -984,6 +914,7 @@ const state = {
   files: [],
   processedBlobs: [],
   wmImage: null,
+  wmImageBase64: null, // ★ 修正3: 儲存 base64
   selectedPos: 'center',
   activeTab: 'text',
   previewIndex: 0,
@@ -1023,8 +954,7 @@ function updateCurrentImageInfo(fileObj) {
   document.getElementById('currentProcessStatus').textContent = fileObj ? (fileObj.processed ? '已完成' : '待處理') : '待處理';
 }
 
-
-// ===== REMEMBER ME helpers (cookie-based, no localStorage) =====
+// ===== COOKIE HELPERS =====
 function setCookie(name, value, days) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
@@ -1040,33 +970,14 @@ function deleteCookie(name) {
 // ===== CAPTCHA =====
 let captchaAnswer = 0;
 function generateCaptcha() {
-  const ops = ['+', '-', '+'];
   const a = Math.floor(Math.random() * 15) + 1;
   const b = Math.floor(Math.random() * 10) + 1;
-  const op = ops[Math.floor(Math.random() * ops.length)];
+  const op = Math.random() > 0.5 ? '+' : '-';
   captchaAnswer = op === '+' ? a + b : a - b;
   document.getElementById('captchaQuestion').textContent = `請計算：${a} ${op} ${b} = ?`;
   document.getElementById('captchaInput').value = '';
 }
 document.getElementById('captchaRefresh').addEventListener('click', generateCaptcha);
-
-// ===== THEME TOGGLE =====
-(function(){
-  const t = document.querySelector('[data-theme-toggle]');
-  const r = document.documentElement;
-  let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
-  r.setAttribute('data-theme', d);
-  t.innerHTML = d === 'dark'
-    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-  if(t) t.addEventListener('click', () => {
-    d = d === 'dark' ? 'light' : 'dark';
-    r.setAttribute('data-theme', d);
-    t.innerHTML = d === 'dark'
-      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-  });
-})();
 
 // ===== TOAST =====
 function showToast(msg, type = 'success') {
@@ -1101,7 +1012,7 @@ document.getElementById('modalClose').addEventListener('click', closeAuthModal);
 document.getElementById('authModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeAuthModal(); });
 document.querySelectorAll('.modal-tab').forEach(btn => btn.addEventListener('click', () => switchModalTab(btn.dataset.modalTab)));
 
-// ===== CORE LOGIN FUNCTION =====
+// ===== CORE LOGIN =====
 async function doLogin(username, password) {
   const res = await fetch(API.token, {
     method: 'POST',
@@ -1129,13 +1040,11 @@ document.getElementById('btnLogin').addEventListener('click', async () => {
     const data = await doLogin(username, password);
     auth.token = data.token;
     auth.user = { name: data.user_display_name, email: data.user_email, nicename: data.user_nicename };
-
     if (remember) {
       setCookie(REMEMBER_KEY, JSON.stringify({ username, password }), REMEMBER_DAYS);
     } else {
       deleteCookie(REMEMBER_KEY);
     }
-
     closeAuthModal();
     onLoginSuccess();
   } catch(e) {
@@ -1177,7 +1086,6 @@ document.getElementById('btnRegister').addEventListener('click', async () => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || '註冊失敗，請換個帳號名稱或信箱');
 
-    // 註冊成功 → 直接自動登入
     showToast('帳號建立成功！正在自動登入...');
     const loginData = await doLogin(username, password);
     auth.token = loginData.token;
@@ -1206,7 +1114,7 @@ function onLoginSuccess() {
   fetchPreset();
 }
 
-// ===== AUTO LOGIN FROM COOKIE =====
+// ===== AUTO LOGIN =====
 (async function tryAutoLogin() {
   const saved = getCookie(REMEMBER_KEY);
   if (!saved) return;
@@ -1257,7 +1165,8 @@ async function fetchPreset() {
   } catch(e) { /* silent */ }
 }
 
-// ===== PRESET: COLLECT CURRENT SETTINGS =====
+// ===== PRESET: COLLECT =====
+// ★ 修正3: 文字直接存 JSON（不 encode），圖片浮水印轉 base64 一同儲存
 function collectSettings() {
   return {
     wmText: document.getElementById('wmText').value,
@@ -1267,6 +1176,8 @@ function collectSettings() {
     wmOpacity: document.getElementById('wmOpacity').value,
     wmRotation: document.getElementById('wmRotation').value,
     wmImgSize: document.getElementById('wmImgSize').value,
+    wmImgBase64: state.wmImageBase64 || null,
+    wmImgName: state.wmImageName || null,
     wmTileGap: document.getElementById('wmTileGap').value,
     wmTile: document.getElementById('wmTile').checked,
     selectedPos: state.selectedPos,
@@ -1276,7 +1187,8 @@ function collectSettings() {
   };
 }
 
-// ===== PRESET: APPLY SETTINGS =====
+// ===== PRESET: APPLY =====
+// ★ 修正3: 載入文字直接賦值，圖片浮水印從 base64 還原
 function applySettings(s) {
   if (!s) return;
   if (s.wmText !== undefined) document.getElementById('wmText').value = s.wmText;
@@ -1300,7 +1212,20 @@ function applySettings(s) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + s.activeTab));
     document.getElementById('statWmType').textContent = s.activeTab === 'text' ? '文字' : '圖片';
   }
-  updatePreview();
+  // ★ 還原圖片浮水印 base64
+  if (s.wmImgBase64) {
+    const img = new Image();
+    img.onload = () => {
+      state.wmImage = img;
+      state.wmImageBase64 = s.wmImgBase64;
+      state.wmImageName = s.wmImgName || '已儲存圖片';
+      document.getElementById('wmImgLabel').textContent = '✓ ' + (s.wmImgName || '已儲存圖片');
+      updatePreview();
+    };
+    img.src = s.wmImgBase64;
+  } else {
+    updatePreview();
+  }
 }
 
 // ===== PRESET: SAVE =====
@@ -1425,19 +1350,23 @@ function handleFiles(newFiles) {
 }
 
 // ===== WATERMARK IMAGE UPLOAD =====
+// ★ 修正3: 儲存 base64 到 state.wmImageBase64
 document.getElementById('wmFileInput').addEventListener('change', function() {
   if (!this.files[0]) return;
+  const file = this.files[0];
   const reader = new FileReader();
   reader.onload = e => {
     const img = new Image();
     img.onload = () => {
       state.wmImage = img;
-      document.getElementById('wmImgLabel').textContent = '✓ ' + this.files[0].name;
+      state.wmImageBase64 = e.target.result;
+      state.wmImageName = file.name;
+      document.getElementById('wmImgLabel').textContent = '✓ ' + file.name;
       updatePreview();
     };
     img.src = e.target.result;
   };
-  reader.readAsDataURL(this.files[0]);
+  reader.readAsDataURL(file);
 });
 
 // ===== RENDER GRID =====
@@ -1674,7 +1603,7 @@ document.getElementById('btnDownloadAll').addEventListener('click', async () => 
     const zip = new JSZip();
     const fmt = document.getElementById('outputFormat').value;
     const ext = fmt.split('/')[1];
-    state.processedBlobs.forEach(({ blob, name }, i) => {
+    state.processedBlobs.forEach(({ blob, name }) => {
       if (!blob) return;
       const baseName = name.replace(/\.[^.]+$/, '');
       zip.file(`${baseName}_wm.${ext}`, blob);
@@ -1689,7 +1618,8 @@ document.getElementById('btnDownloadAll').addEventListener('click', async () => 
   } catch(e) {
     showToast('下載失敗：' + e.message, 'error');
   } finally {
-    btn.disabled = false; btn.textContent = '下載全部（ZIP）';
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 下載全部（ZIP）';
   }
 });
 
