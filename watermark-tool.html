@@ -22,27 +22,27 @@
   --space-16: 4rem;
 
   --color-bg: #f7f6f2;
-  --color-surface: #f9f8f5;
-  --color-surface-2: #fbfbf9;
-  --color-surface-offset: #f3f0ec;
+  --color-surface: rgba(255,255,255,0.82);
+  --color-surface-2: rgba(255,255,255,0.9);
+  --color-surface-offset: #eef4ff;
   --color-surface-dynamic: #e6e4df;
   --color-divider: #dcd9d5;
-  --color-border: #d4d1ca;
+  --color-border: #d8e1f0;
   --color-text: #28251d;
   --color-text-muted: #7a7974;
   --color-text-faint: #bab9b4;
-  --color-primary: #01696f;
-  --color-primary-hover: #0c4e54;
-  --color-primary-highlight: #cedcd8;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-highlight: #dbeafe;
   --color-error: #a12c7b;
   --color-success: #437a22;
 
   --radius-sm: 0.375rem; --radius-md: 0.5rem;
   --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
   --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-  --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
-  --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
-  --shadow-lg: 0 12px 32px oklch(0.2 0.01 80 / 0.12);
+  --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 16px 40px rgba(15, 23, 42, 0.10);
+  --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.16);
   --font-body: 'Inter', system-ui, sans-serif;
   --content-default: 1100px;
 }
@@ -76,7 +76,7 @@ html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
 body {
   min-height: 100dvh; font-family: var(--font-body);
   font-size: var(--text-base); color: var(--color-text);
-  background: var(--color-bg);
+  background: radial-gradient(circle at top, #ffffff 0%, #f4f7fb 38%, #eef2f7 100%);
 }
 img, canvas { display: block; max-width: 100%; }
 input, button, select, textarea { font: inherit; color: inherit; }
@@ -153,7 +153,7 @@ main { flex: 1; max-width: var(--content-default); margin: 0 auto; width: 100%; 
 .form-group:last-child { margin-bottom: 0; }
 label { font-size: var(--text-sm); font-weight: 500; color: var(--color-text-muted); }
 input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
-  background: var(--color-bg); border: 1px solid var(--color-border);
+  background: radial-gradient(circle at top, #ffffff 0%, #f4f7fb 38%, #eef2f7 100%); border: 1px solid var(--color-border);
   border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm); color: var(--color-text);
   transition: border-color var(--transition-interactive), box-shadow var(--transition-interactive);
@@ -164,7 +164,7 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="email"]:focus,
   outline: none;
 }
 input[type="range"] { width: 100%; accent-color: var(--color-primary); cursor: pointer; }
-input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; padding: 2px; background: var(--color-bg); }
+input[type="color"] { width: 44px; height: 36px; border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; padding: 2px; background: radial-gradient(circle at top, #ffffff 0%, #f4f7fb 38%, #eef2f7 100%); }
 
 .row-inline { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .row-inline label { min-width: 60px; margin: 0; }
@@ -449,6 +449,88 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
   .logo-text { display: none; }
   .logo-divider { display: none; }
 }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 420px;
+  background: radial-gradient(circle, rgba(37,99,235,0.18), rgba(37,99,235,0.02) 55%, transparent 72%);
+  filter: blur(18px);
+  animation: breathingGlow 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+.app-wrapper, header, main, footer, .toast-container, .modal-overlay { position: relative; z-index: 1; }
+.card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.58);
+}
+.upload-zone, .preview-wrap, .stats-bar, .modal {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.upload-zone {
+  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(248,250,252,0.92));
+}
+.preview-wrap {
+  background: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(241,245,249,0.95));
+}
+.logo-img { filter: drop-shadow(0 6px 18px rgba(37,99,235,.14)); }
+.btn-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}
+.loading-pulse {
+  animation: breathingGlow 1.6s ease-in-out infinite;
+}
+.image-meta {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(15,23,42,.12), rgba(15,23,42,.72));
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+.photo-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.info-chip {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.72);
+}
+.info-chip-label {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+.info-chip-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  word-break: break-word;
+}
+@keyframes breathingGlow {
+  0%, 100% { opacity: .58; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
 </style>
 </head>
 <body>
@@ -537,6 +619,10 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
     <div class="stat-item">
       <span class="stat-value" id="statWmType">文字</span>
       <span class="stat-label">浮水印類型</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value" id="statCurrentSize">—</span>
+      <span class="stat-label">目前照片尺寸</span>
     </div>
   </div>
 
@@ -705,6 +791,45 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
             <span class="range-value" id="outputQualityVal">90%</span>
           </div>
         </div>
+
+        <div class="card" style="margin-top:var(--space-6)">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v18"/><path d="M3 8h18"/></svg>
+            尺寸調整
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:500;cursor:pointer">
+              <input type="checkbox" id="resizeEnabled" style="accent-color:var(--color-primary);width:16px;height:16px">
+              啟用輸出尺寸修改
+            </label>
+          </div>
+          <div class="two-col" style="grid-template-columns:1fr 1fr;gap:var(--space-4)">
+            <div class="form-group">
+              <label for="resizeWidth">寬度（px）</label>
+              <input type="number" id="resizeWidth" min="1" placeholder="依原圖">
+            </div>
+            <div class="form-group">
+              <label for="resizeHeight">高度（px）</label>
+              <input type="number" id="resizeHeight" min="1" placeholder="依原圖">
+            </div>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:var(--space-2);font-weight:500;cursor:pointer">
+              <input type="checkbox" id="lockAspectRatio" checked style="accent-color:var(--color-primary);width:16px;height:16px">
+              鎖定原始比例
+            </label>
+          </div>
+          <div class="photo-info-grid">
+            <div class="info-chip">
+              <span class="info-chip-label">原始尺寸</span>
+              <span class="info-chip-value" id="currentImageSize">—</span>
+            </div>
+            <div class="info-chip">
+              <span class="info-chip-label">輸出尺寸</span>
+              <span class="info-chip-value" id="outputImageSize">—</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -728,7 +853,13 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
             <h3>尚未載入圖片</h3>
             <p>上傳圖片後可預覽浮水印效果</p>
           </div>
+          <div id="previewLoading" class="empty-state loading-pulse" style="display:none;padding:var(--space-10)"><h3>預覽載入中</h3><p>正在生成高品質即時預覽</p></div>
           <canvas id="previewCanvas" style="display:none"></canvas>
+        </div>
+
+        <div class="photo-info-grid" style="margin-bottom:var(--space-4)">
+          <div class="info-chip"><span class="info-chip-label">檔案名稱</span><span class="info-chip-value" id="currentFileName">—</span></div>
+          <div class="info-chip"><span class="info-chip-label">處理狀態</span><span class="info-chip-value" id="currentProcessStatus">待處理</span></div>
         </div>
 
         <div class="action-bar">
@@ -753,7 +884,7 @@ footer { border-top: 1px solid var(--color-divider); padding: var(--space-4) var
   </div>
 </main>
 
-<footer>圖片完全在您的瀏覽器本地處理，不會上傳至任何伺服器。&nbsp;·&nbsp; 批次浮水印工具</footer>
+<footer>圖片完全在您的瀏覽器本地處理，不會上傳至任何伺服器。&nbsp;·&nbsp; 專業批次浮水印工作台</footer>
 </div>
 
 <!-- TOAST CONTAINER -->
@@ -857,6 +988,41 @@ const state = {
   activeTab: 'text',
   previewIndex: 0,
 };
+
+let previewRaf = 0;
+
+function debouncePreview() {
+  cancelAnimationFrame(previewRaf);
+  previewRaf = requestAnimationFrame(() => updatePreview());
+}
+
+function getResizeConfig(srcW, srcH) {
+  const enabled = document.getElementById('resizeEnabled')?.checked;
+  if (!enabled) return { width: srcW, height: srcH };
+  let width = parseInt(document.getElementById('resizeWidth').value, 10);
+  let height = parseInt(document.getElementById('resizeHeight').value, 10);
+  const lock = document.getElementById('lockAspectRatio')?.checked;
+  if (!width && !height) return { width: srcW, height: srcH };
+  if (lock) {
+    const ratio = srcW / srcH;
+    if (width && !height) height = Math.round(width / ratio);
+    else if (!width && height) width = Math.round(height * ratio);
+  }
+  width = Math.max(1, width || srcW);
+  height = Math.max(1, height || srcH);
+  return { width, height };
+}
+
+function updateCurrentImageInfo(fileObj) {
+  const currentSize = fileObj ? `${fileObj.width} × ${fileObj.height}` : '—';
+  document.getElementById('statCurrentSize').textContent = currentSize;
+  document.getElementById('currentImageSize').textContent = currentSize;
+  document.getElementById('currentFileName').textContent = fileObj ? fileObj.file.name : '—';
+  const out = fileObj ? getResizeConfig(fileObj.width, fileObj.height) : { width: '—', height: '—' };
+  document.getElementById('outputImageSize').textContent = fileObj ? `${out.width} × ${out.height}` : '—';
+  document.getElementById('currentProcessStatus').textContent = fileObj ? (fileObj.processed ? '已完成' : '待處理') : '待處理';
+}
+
 
 // ===== REMEMBER ME helpers (cookie-based, no localStorage) =====
 function setCookie(name, value, days) {
@@ -1245,8 +1411,9 @@ function handleFiles(newFiles) {
     const reader = new FileReader();
     reader.onload = e => {
       const img = new Image();
+      img.decoding = 'async';
       img.onload = () => {
-        state.files.push({ file: f, url: e.target.result, img, processed: false });
+        state.files.push({ file: f, url: e.target.result, img, width: img.naturalWidth || img.width, height: img.naturalHeight || img.height, processed: false });
         renderGrid();
         updateStats();
         if (state.files.length === 1) { state.previewIndex = 0; updatePreview(); }
@@ -1302,11 +1469,16 @@ function renderGrid() {
 
 // ===== WATERMARK ENGINE =====
 function applyWatermark(img) {
+  const srcW = img.naturalWidth || img.width;
+  const srcH = img.naturalHeight || img.height;
+  const target = getResizeConfig(srcW, srcH);
   const canvas = document.createElement('canvas');
-  canvas.width = img.naturalWidth || img.width;
-  canvas.height = img.naturalHeight || img.height;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
+  canvas.width = target.width;
+  canvas.height = target.height;
+  const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: false });
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
   const opacity = parseFloat(document.getElementById('wmOpacity').value) / 100;
   const rotation = parseFloat(document.getElementById('wmRotation').value) * Math.PI / 180;
@@ -1396,24 +1568,62 @@ function drawTile(ctx, cw, ch, rotation) {
 function updatePreview() {
   const canvas = document.getElementById('previewCanvas');
   const empty = document.getElementById('previewEmpty');
+  const loading = document.getElementById('previewLoading');
   if (!state.files.length) {
-    canvas.style.display = 'none'; empty.style.display = 'flex'; return;
+    canvas.style.display = 'none';
+    loading.style.display = 'none';
+    empty.style.display = 'flex';
+    updateCurrentImageInfo(null);
+    return;
   }
-  empty.style.display = 'none'; canvas.style.display = 'block';
   const src = state.files[state.previewIndex];
   if (!src) return;
-  const result = applyWatermark(src.img);
-  const ctx = canvas.getContext('2d');
-  canvas.width = result.width; canvas.height = result.height;
-  ctx.drawImage(result, 0, 0);
+  empty.style.display = 'none';
+  loading.style.display = 'flex';
+  canvas.style.display = 'none';
+  updateCurrentImageInfo(src);
+  requestAnimationFrame(() => {
+    const result = applyWatermark(src.img);
+    const ctx = canvas.getContext('2d');
+    canvas.width = result.width;
+    canvas.height = result.height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(result, 0, 0);
+    loading.style.display = 'none';
+    canvas.style.display = 'block';
+  });
 }
 
 document.getElementById('refreshPreview').addEventListener('click', updatePreview);
+['resizeEnabled','resizeWidth','resizeHeight','lockAspectRatio'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => debouncePreview());
+  el.addEventListener('change', () => debouncePreview());
+});
+document.getElementById('resizeWidth')?.addEventListener('input', e => {
+  const current = state.files[state.previewIndex];
+  if (!current || !document.getElementById('lockAspectRatio').checked) return;
+  const w = parseInt(e.target.value, 10);
+  if (!w) return;
+  document.getElementById('resizeHeight').value = Math.round(w * current.height / current.width);
+  debouncePreview();
+});
+document.getElementById('resizeHeight')?.addEventListener('input', e => {
+  const current = state.files[state.previewIndex];
+  if (!current || !document.getElementById('lockAspectRatio').checked) return;
+  const h = parseInt(e.target.value, 10);
+  if (!h) return;
+  document.getElementById('resizeWidth').value = Math.round(h * current.width / current.height);
+  debouncePreview();
+});
 
 // ===== STATS =====
 function updateStats() {
   document.getElementById('statTotal').textContent = state.files.length;
   document.getElementById('statDone').textContent = state.files.filter(f => f.processed).length;
+  const current = state.files[state.previewIndex];
+  document.getElementById('statCurrentSize').textContent = current ? `${current.width} × ${current.height}` : '—';
 }
 
 // ===== PROCESS =====
@@ -1443,7 +1653,7 @@ document.getElementById('btnProcess').addEventListener('click', async () => {
     const pct = Math.round(((i + 1) / state.files.length) * 100);
     progressFill.style.width = pct + '%';
     progressText.textContent = `處理中… ${i + 1} / ${state.files.length}`;
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise(requestAnimationFrame);
   }
 
   renderGrid();
