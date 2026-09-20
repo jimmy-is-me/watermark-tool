@@ -1,88 +1,47 @@
 # 批次浮水印工具
 
-純前端批次浮水印工具，支援文字與圖片浮水印、ZIP 批次下載。
-會員功能透過 WordPress REST API 儲存/載入個人浮水印設定。
+純前端的批次浮水印工具，可在瀏覽器中為多張圖片加入文字或圖片浮水印，並下載處理結果。工具不需要帳號、不連線至 WordPress，也不會將圖片或設定傳送到伺服器。
 
----
+## 功能
 
-## 📁 檔案說明
+- 批次上傳 JPG、PNG、WebP、GIF 等圖片
+- 文字與圖片浮水印
+- 調整字型、大小、顏色、透明度、旋轉、位置與平鋪效果
+- 調整輸出尺寸、格式與品質
+- 即時預覽與 ZIP 批次下載
+- 將浮水印設定儲存在目前瀏覽器的 localStorage
+
+## 使用方式
+
+1. 開啟 `watermark-tool.html`，或使用 GitHub Pages 發布此儲存庫。
+2. 上傳一張或多張圖片。
+3. 在「浮水印設定」中調整文字或上傳浮水印圖片。
+4. 點擊「儲存設定」，下次在同一瀏覽器開啟工具時即可載入設定。
+5. 點擊「開始批次處理」，完成後下載單張結果或 ZIP 檔。
+
+## 本機儲存與隱私
+
+- 浮水印設定只保存在使用者目前的瀏覽器與裝置中，鍵名為 `watermark-tool.preset.v1`。
+- 圖片處理完全在瀏覽器完成；原圖與輸出檔不會上傳。
+- 清除瀏覽器的網站資料、使用無痕模式，或換用裝置／瀏覽器後，儲存的設定不會保留。
+- 如果浮水印圖片很大，瀏覽器可能因 localStorage 容量不足而無法儲存；請使用較小的圖片或只儲存文字設定。
+
+## 專案檔案
 
 | 檔案 | 說明 |
-|---|---|
-| `watermark-tool.html` | 主要工具頁面 |
-| `logo.png` | 網站 Logo（需自行上傳，見下方說明） |
-| `wp-plugins/watermark-preset-api/` | WordPress Plugin：浮水印設定 REST API |
+| --- | --- |
+| `watermark-tool.html` | 完整的前端工具頁面 |
+| `logo.png` | 網站 Logo |
+| `_redirects` | 部署平台的重新導向設定 |
 
----
+## 自訂 Logo
 
-## 🖼 上傳 Logo
+將透明背景的 PNG 命名為 `logo.png`，放在儲存庫根目錄（與 `watermark-tool.html` 同層）。建議高度為 32–40px。
 
-將你的 logo 圖片命名為 `logo.png`，上傳到 repo **根目錄**（與 `watermark-tool.html` 同層）。
+## 部署
 
-- **建議規格**：透明背景 PNG，高度約 32–40px
-- **檔名必須是**：`logo.png`
-- **上傳路徑**：`jimmy-is-me/watermark-tool/logo.png`
+這是靜態網站，不需後端服務。可直接以 GitHub Pages、Netlify、Cloudflare Pages 或任何靜態檔案主機部署。部署後請確保 `watermark-tool.html` 可作為入口頁面存取。
 
----
+## 開發
 
-## 🔧 WordPress 後端安裝步驟
-
-工具使用你的 WordPress 站 `watermark.wulk.cc` 作為會員後端。
-需要安裝以下兩個 Plugin：
-
-### Step 1：安裝 JWT Authentication Plugin
-
-從 WordPress 外掛目錄安裝：
-**[JWT Authentication for WP REST API](https://wordpress.org/plugins/jwt-authentication-for-wp-rest-api/)**
-
-安裝後在 `wp-config.php` 加入：
-
-```php
-define('JWT_AUTH_SECRET_KEY', 'your-secret-key-here'); // 換成你自己的隨機字串
-define('JWT_AUTH_CORS_ENABLE', true);
-```
-
-並在 `.htaccess` 加入（Apache）：
-
-```apache
-RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-```
-
-### Step 2：安裝自訂浮水印 API Plugin
-
-1. 將 `wp-plugins/watermark-preset-api/` 整個資料夾複製到你 WordPress 的 `wp-content/plugins/` 目錄下
-2. 到 WordPress 後台 → **外掛** → 啟用「Watermark Preset API」
-
-### Step 3：設定 CORS
-
-前端從 GitHub Pages 呼叫 WordPress API，需允許跨來源請求。
-
-在 `wp-config.php` 或 Plugin 中已自動加入 CORS header。
-若仍遇到 CORS 錯誤，請確認 WordPress 站已安裝並啟用本 Plugin。
-
-### Step 4：開放用戶自行註冊
-
-到 WordPress 後台 → **設定 → 一般** → 勾選「允許任何人註冊」
-
----
-
-## 🔌 API 端點
-
-| 方法 | 端點 | 說明 |
-|---|---|---|
-| `POST` | `/wp-json/jwt-auth/v1/token` | 登入取得 JWT Token |
-| `POST` | `/wp-json/wp/v2/users/register` | 註冊新帳號 |
-| `GET` | `/wp-json/watermark/v1/preset` | 讀取目前會員的浮水印設定 |
-| `POST` | `/wp-json/watermark/v1/preset` | 儲存目前會員的浮水印設定 |
-
----
-
-## 📝 前端設定
-
-`watermark-tool.html` 中已設定 API 基底網址：
-
-```js
-const WP_URL = 'https://watermark.wulk.cc';
-```
-
-如需修改，更換這個變數即可。
+此專案沒有建置步驟與相依套件。修改 `watermark-tool.html` 後，以現代瀏覽器直接開啟檔案測試即可。
